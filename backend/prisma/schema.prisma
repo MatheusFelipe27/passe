@@ -12,7 +12,7 @@ model Player {
   id          Int       @id @default(autoincrement())
   name        String    @map("nome") @db.VarChar(100)
   // Nome em minúsculas e sem acentos: usado na busca e na ordem alfabética (RN07)
-  sortName    String    @map("nome_ordenacao") @db.VarChar(100)
+  sortName    String    @map("nome_ordenacao") @db.Text
   position    String    @map("posicao") @db.VarChar(3)
   agility     Int       @map("agilidade")
   age         Int       @map("idade")
