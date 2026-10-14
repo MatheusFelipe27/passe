@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1233.5" height="701.5" viewBox="0 0 1233.5 701.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Decora&#195;&#167;&#195;&#163;o &#194;&#183; campo (aria-hidden)">
+<rect id="Linhas externas" x="16.75" y="0.75" width="1200" height="700" rx="24" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Grande &#195;&#161;rea esquerda" x="16.75" y="175.75" width="170" height="350" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Grande &#195;&#161;rea direita" x="1046.75" y="175.75" width="170" height="350" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Pequena &#195;&#161;rea esquerda" x="16.75" y="270.75" width="60" height="160" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Pequena &#195;&#161;rea direita" x="1156.75" y="270.75" width="60" height="160" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Trave esquerda" x="0.75" y="310.75" width="16" height="80" rx="2" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Trave direita" x="1216.75" y="310.75" width="16" height="80" rx="2" stroke="#E4E4E7" stroke-width="1.5"/>
+<rect id="Linha do meio" x="615.75" y="0.75" width="1.5" height="700" fill="#E4E4E7"/>
+<circle id="C&#195;&#173;rculo central" cx="616.75" cy="350.75" r="150" stroke="#E4E4E7" stroke-width="1.5"/>
+<circle id="Ponto central" cx="616.25" cy="350.25" r="3.5" fill="#E4E4E7"/>
+<circle id="Marca do p&#195;&#170;nalti esquerda" cx="131.75" cy="350.75" r="3" fill="#E4E4E7"/>
+<circle id="Marca do p&#195;&#170;nalti direita" cx="1101.75" cy="350.75" r="3" fill="#E4E4E7"/>
+<path id="Meia-lua esquerda" d="M186.75 278.252C197.938 286.739 207.009 297.7 213.255 310.278C219.5 322.855 222.75 336.707 222.75 350.75C222.75 364.793 219.5 378.645 213.255 391.222C207.009 403.8 197.938 414.761 186.75 423.248L185.843 422.053C196.847 413.706 205.769 402.925 211.911 390.555C218.054 378.185 221.25 364.561 221.25 350.75C221.25 336.939 218.054 323.315 211.911 310.945C205.769 298.575 196.847 287.794 185.843 279.447L186.75 278.252Z" fill="#E4E4E7"/>
+<path id="Meia-lua direita" d="M1046.75 423.248C1035.56 414.761 1026.49 403.8 1020.25 391.222C1014 378.645 1010.75 364.793 1010.75 350.75C1010.75 336.707 1014 322.855 1020.25 310.278C1026.49 297.7 1035.56 286.739 1046.75 278.252L1047.66 279.447C1036.65 287.794 1027.73 298.575 1021.59 310.945C1015.45 323.315 1012.25 336.939 1012.25 350.75C1012.25 364.561 1015.45 378.185 1021.59 390.555C1027.73 402.925 1036.65 413.706 1047.66 422.053L1046.75 423.248Z" fill="#E4E4E7"/>
+</g>
+</svg>
