@@ -27,6 +27,27 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-success: var(--success);
   --color-destructive: var(--destructive);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-success-soft-border: var(--success-soft-border);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
+  --color-warning-soft-border: var(--warning-soft-border);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-soft-foreground: var(--destructive-soft-foreground);
+  --color-destructive-soft-border: var(--destructive-soft-border);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-avatar-violet: var(--avatar-violet);
+  --color-avatar-violet-foreground: var(--avatar-violet-foreground);
+  --color-avatar-pink: var(--avatar-pink);
+  --color-avatar-pink-foreground: var(--avatar-pink-foreground);
+  --color-avatar-cyan: var(--avatar-cyan);
+  --color-avatar-cyan-foreground: var(--avatar-cyan-foreground);
+  --color-avatar-teal: var(--avatar-teal);
+  --color-avatar-teal-foreground: var(--avatar-teal-foreground);
+  --color-avatar-zinc: var(--avatar-zinc);
+  --color-avatar-zinc-foreground: var(--avatar-zinc-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -61,6 +82,27 @@
   --accent-foreground: #18181b;
   --success: #00813a;
   --destructive: #e40016;
+  --success-soft: #f0fdf4;
+  --success-soft-foreground: #016630;
+  --success-soft-border: #b9f8cf;
+  --warning-soft: #fffbeb;
+  --warning-soft-foreground: #953d00;
+  --warning-soft-border: #fee685;
+  --destructive-soft: #fef2f2;
+  --destructive-soft-foreground: #bf000f;
+  --destructive-soft-border: #ffcaca;
+  --sidebar: #fafafa;
+  --sidebar-border: #e4e4e7;
+  --avatar-violet: #ede9fe;
+  --avatar-violet-foreground: #7008e7;
+  --avatar-pink: #fce7f3;
+  --avatar-pink-foreground: #c2005c;
+  --avatar-cyan: #cefafe;
+  --avatar-cyan-foreground: #005f78;
+  --avatar-teal: #cbfbf1;
+  --avatar-teal-foreground: #005f5a;
+  --avatar-zinc: #e4e4e7;
+  --avatar-zinc-foreground: #3f3f46;
   --border: #e4e4e7;
   --input: #91919b;
   --ring: #155dfc;
@@ -72,5 +114,11 @@
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
+  }
+  /* Todo elemento clicável habilitado mostra a mãozinha (o Tailwind 4 deixa a seta nos botões). */
+  button:not(:disabled),
+  [role='tab']:not(:disabled),
+  [role='menuitemradio']:not([data-disabled]) {
+    cursor: pointer;
   }
 }
