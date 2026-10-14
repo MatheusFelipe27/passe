@@ -3,6 +3,8 @@ import { Player } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DbClient } from '../../prisma/transaction-runner';
 import { Condition, PlayerAttributes, Position } from './domain/player.types';
+import { ListPlayersQuery } from './dto/list-players.query';
+import { buildPlayersFilter, buildPlayersOrder } from './players.query-builder';
 
 export interface PlayerChanges {
   name: string;
@@ -17,6 +19,11 @@ export interface NewPlayer extends PlayerChanges, PlayerAttributes {
   baseValue: string;
 }
 
+export interface PlayerPage {
+  players: Player[];
+  total: number;
+}
+
 @Injectable()
 export class PlayersRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -27,6 +34,29 @@ export class PlayersRepository {
 
   findActiveById(id: number): Promise<Player | null> {
     return this.prisma.player.findFirst({ where: { id, deletedAt: null } });
+  }
+
+  // RN07: busca, filtra e ordena no banco e só depois pagina.
+  async list(query: ListPlayersQuery): Promise<PlayerPage> {
+    const filter = buildPlayersFilter(query);
+    const offset = (query.page - 1) * query.limit;
+    const [rows, [{ total }]] = await Promise.all([
+      this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT j.id FROM jogadores j WHERE ${filter}
+        ORDER BY ${buildPlayersOrder(query.sort)}
+        LIMIT ${query.limit} OFFSET ${offset}`,
+      this.prisma.$queryRaw<{ total: number }[]>`
+        SELECT COUNT(*)::int AS total FROM jogadores j WHERE ${filter}`,
+    ]);
+    const ids = rows.map((row) => row.id);
+    const players = await this.prisma.player.findMany({
+      where: { id: { in: ids } },
+    });
+    const byId = new Map(players.map((player) => [player.id, player]));
+    return {
+      players: ids.flatMap((id) => byId.get(id) ?? []),
+      total,
+    };
   }
 
   // Trava a linha do jogador até o fim da transação, para que duas operações não o alterem ao mesmo tempo.

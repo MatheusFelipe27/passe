@@ -9,18 +9,25 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Res,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { resourceLocation } from '../../common/http/api-prefix';
+import { Paginated } from '../../common/http/paginated';
 import { ParseResourceIdPipe } from '../../common/pipes/parse-resource-id.pipe';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { toOpenApiSchema } from '../../common/validation/open-api';
+import {
+  ApiQueryFromSchema,
+  toOpenApiSchema,
+} from '../../common/validation/open-api';
 import { changeConditionSchema } from './dto/change-condition.schema';
 import type { ChangeConditionInput } from './dto/change-condition.schema';
 import { createPlayerSchema } from './dto/create-player.schema';
 import type { CreatePlayerInput } from './dto/create-player.schema';
+import { listPlayersQuerySchema } from './dto/list-players.query';
+import type { ListPlayersQuery } from './dto/list-players.query';
 import { updatePlayerSchema } from './dto/update-player.schema';
 import type { UpdatePlayerInput } from './dto/update-player.schema';
 import { PlayerView } from './player.view';
@@ -32,6 +39,16 @@ const RESOURCE = 'players';
 @Controller(RESOURCE)
 export class PlayersController {
   constructor(private readonly players: PlayersService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Lista paginada, com busca, filtros e ordenação' })
+  @ApiQueryFromSchema(listPlayersQuerySchema)
+  list(
+    @Query(new ZodValidationPipe(listPlayersQuerySchema))
+    query: ListPlayersQuery,
+  ): Promise<Paginated<PlayerView>> {
+    return this.players.list(query);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Cadastra jogador' })

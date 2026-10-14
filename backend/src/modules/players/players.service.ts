@@ -3,14 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Paginated, paginate } from '../../common/http/paginated';
 import { toSortKey } from '../../common/text/text';
 import { Player } from '../../generated/prisma/client';
 import { DbClient, TransactionRunner } from '../../prisma/transaction-runner';
+import { ClubsRepository } from '../clubs/clubs.repository';
 import { LineupsRepository } from '../lineups/lineups.repository';
 import { calculateBaseValue } from './domain/base-value';
 import { calculateOverall } from './domain/overall';
 import { Condition } from './domain/player.types';
 import { CreatePlayerInput } from './dto/create-player.schema';
+import { ListPlayersQuery } from './dto/list-players.query';
 import { UpdatePlayerInput } from './dto/update-player.schema';
 import { PlayerView, toPlayerView } from './player.view';
 import { PlayersRepository } from './players.repository';
@@ -22,6 +25,7 @@ export class PlayersService {
   constructor(
     private readonly players: PlayersRepository,
     private readonly lineups: LineupsRepository,
+    private readonly clubs: ClubsRepository,
     private readonly transactions: TransactionRunner,
   ) {}
 
@@ -38,6 +42,17 @@ export class PlayersService {
       baseValue: baseValue.toFixed(2),
     });
     return toPlayerView(player);
+  }
+
+  async list(query: ListPlayersQuery): Promise<Paginated<PlayerView>> {
+    if (
+      query.clubId !== undefined &&
+      !(await this.clubs.exists(query.clubId))
+    ) {
+      throw new NotFoundException('Clube não encontrado.');
+    }
+    const { players, total } = await this.players.list(query);
+    return paginate(players.map(toPlayerView), total, query.page, query.limit);
   }
 
   async findById(id: number): Promise<PlayerView> {

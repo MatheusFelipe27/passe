@@ -1,9 +1,11 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Player, Prisma } from '../../generated/prisma/client';
 import { DbClient, TransactionRunner } from '../../prisma/transaction-runner';
+import { ClubsRepository } from '../clubs/clubs.repository';
 import { LineupsRepository } from '../lineups/lineups.repository';
 import { Condition } from './domain/player.types';
 import { CreatePlayerInput } from './dto/create-player.schema';
+import { ListPlayersQuery } from './dto/list-players.query';
 import { UpdatePlayerInput } from './dto/update-player.schema';
 import {
   NewPlayer,
@@ -62,7 +64,9 @@ describe('PlayersService', () => {
     | 'update'
     | 'updateCondition'
     | 'softDelete'
+    | 'list'
   >;
+  let clubs: MockOf<ClubsRepository, 'exists'>;
   let lineups: MockOf<LineupsRepository, 'removePlayer'>;
   let service: PlayersService;
 
@@ -86,7 +90,9 @@ describe('PlayersService', () => {
         Promise.resolve(storedPlayer({ ...current, condition })),
       ),
       softDelete: jest.fn(() => Promise.resolve()),
+      list: jest.fn(() => Promise.resolve({ players: [], total: 0 })),
     };
+    clubs = { exists: jest.fn(() => Promise.resolve(true)) };
     lineups = { removePlayer: jest.fn(() => Promise.resolve()) };
     const transactions = {
       run: <T>(work: (client: DbClient) => Promise<T>) => work(db),
@@ -94,6 +100,7 @@ describe('PlayersService', () => {
     service = new PlayersService(
       players as unknown as PlayersRepository,
       lineups,
+      clubs as unknown as ClubsRepository,
       transactions as unknown as TransactionRunner,
     );
   });
@@ -137,6 +144,67 @@ describe('PlayersService', () => {
         overall: 75,
         club_id: null,
       });
+    });
+  });
+
+  describe('list', () => {
+    const query: ListPlayersQuery = { sort: ['name'], page: 1, limit: 10 };
+
+    it.each([
+      [23, 10, 1, 3],
+      [23, 10, 3, 3],
+      [23, 10, 4, 3],
+      [23, 50, 1, 1],
+      [20, 10, 1, 2],
+      [21, 10, 1, 3],
+      [1, 10, 1, 1],
+      [0, 10, 1, 0],
+    ])(
+      '%i itens com limit %i na página %i dão %i páginas',
+      async (total, limit, page, totalPages) => {
+        players.list.mockResolvedValue({ players: [], total });
+
+        const result = await service.list({ ...query, page, limit });
+
+        expect(result.meta).toEqual({
+          page,
+          limit,
+          total_items: total,
+          total_pages: totalPages,
+        });
+      },
+    );
+
+    it('devolve os jogadores na ordem do banco, com os valores calculados', async () => {
+      players.list.mockResolvedValue({
+        players: [
+          storedPlayer({ id: 5, condition: 'MAL_CONDICIONADO' }),
+          storedPlayer({ id: 3 }),
+        ],
+        total: 2,
+      });
+
+      const result = await service.list(query);
+
+      expect(result.data.map((player) => player.id)).toEqual([5, 3]);
+      expect(result.data.map((player) => player.market_value)).toEqual([
+        37, 40,
+      ]);
+    });
+
+    it('recusa com 404 o filtro por clube inexistente', async () => {
+      clubs.exists.mockResolvedValue(false);
+
+      await expect(service.list({ ...query, clubId: 99 })).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(players.list).not.toHaveBeenCalled();
+    });
+
+    it('não consulta o clube quando não há filtro por clube', async () => {
+      await service.list(query);
+
+      expect(clubs.exists).not.toHaveBeenCalled();
     });
   });
 
