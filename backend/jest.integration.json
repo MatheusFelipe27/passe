@@ -1,0 +1,16 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "roots": ["<rootDir>/src"],
+  "testRegex": ".*\\.int-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "testEnvironment": "node",
+  "testTimeout": 30000,
+  "setupFiles": ["dotenv/config"],
+  "globalSetup": "<rootDir>/test/integration/global-setup.ts"
+}
