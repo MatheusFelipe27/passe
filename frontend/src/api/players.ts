@@ -35,8 +35,21 @@ export interface PlayerPage {
   meta: PageMeta;
 }
 
+export type PlayerSort =
+  'name' | 'value_desc' | 'value_asc' | 'age_desc' | 'age_asc' | 'position';
+
+// Query params de GET /players, com os nomes do contrato da API.
 export interface PlayerFilters {
+  search?: string;
+  position?: Position;
+  condition?: Condition;
   free?: boolean;
+  club_id?: number;
+  min_age?: number;
+  max_age?: number;
+  min_value?: string;
+  max_value?: string;
+  sort?: PlayerSort;
   page?: number;
   limit?: number;
 }
