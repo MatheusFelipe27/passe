@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 interface Route {
   path: string;
@@ -18,7 +19,9 @@ export function renderRoutes(routes: Route[], initialPath = '/') {
     router,
     ...render(
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <TooltipProvider>
+          <RouterProvider router={router} />
+        </TooltipProvider>
       </QueryClientProvider>,
     ),
   };

@@ -1,0 +1,28 @@
+import type { Condition, PlayerSort, Position } from '@/api/players';
+
+export const POSITIONS: Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA'];
+
+export const POSITION_NAMES: Record<Position, string> = {
+  GOL: 'Goleiro',
+  ZAG: 'Zagueiro',
+  LAT: 'Lateral',
+  MEI: 'Meio-campo',
+  ATA: 'Atacante',
+};
+
+export const CONDITIONS: Condition[] = ['APTO', 'MAL_CONDICIONADO', 'DOENTE'];
+
+export const CONDITION_NAMES: Record<Condition, string> = {
+  APTO: 'Apto',
+  MAL_CONDICIONADO: 'Mal condicionado',
+  DOENTE: 'Doente',
+};
+
+export const SORT_NAMES: Record<PlayerSort, string> = {
+  name: 'Nome',
+  value_desc: 'Maior valor de mercado',
+  value_asc: 'Menor valor de mercado',
+  age_desc: 'Maior idade',
+  age_asc: 'Menor idade',
+  position: 'Posição (GOL a ATA)',
+};
