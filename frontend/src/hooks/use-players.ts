@@ -41,11 +41,15 @@ export function usePlayer(id: number) {
   });
 }
 
-// Toda ação sobre jogadores rebusca as listas, as contagens e os detalhes abertos.
+// Toda ação sobre jogadores rebusca as listas, as contagens e os detalhes abertos, e também os
+// clubes: o valor de mercado de um jogador entra no valor do elenco e no patrimônio do clube dele.
 function usePlayersInvalidation() {
   const queryClient = useQueryClient();
   return () =>
-    queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.players.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.clubs.all }),
+    ]);
 }
 
 export function useCreatePlayer() {

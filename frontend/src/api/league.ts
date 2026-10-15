@@ -1,14 +1,5 @@
 import { request } from './http-client';
 
-export interface Club {
-  id: number;
-  name: string;
-  acronym: string;
-  cash: number;
-  squad_value: number;
-  net_worth: number;
-}
-
 export interface MatchSide {
   club_id: number;
   club_name: string;
@@ -36,10 +27,6 @@ export interface Standing {
   goals_against: number;
   goal_difference: number;
   points: number;
-}
-
-export function listClubs(): Promise<Club[]> {
-  return request<Club[]>('/clubs');
 }
 
 export function listMatches(): Promise<MatchSummary[]> {

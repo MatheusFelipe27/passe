@@ -8,7 +8,7 @@ import {
   Tag,
   TrendingUp,
 } from 'lucide-react';
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import type { Player } from '@/api/players';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { Badge } from '@/components/ui/badge';

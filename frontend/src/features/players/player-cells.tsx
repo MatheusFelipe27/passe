@@ -1,5 +1,5 @@
 import { cn } from 'cn';
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import type { Condition, Player } from '@/api/players';
 import { Badge } from '@/components/ui/badge';
 import { CONDITION_NAMES, POSITION_NAMES } from './player-labels';

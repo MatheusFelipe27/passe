@@ -1,4 +1,4 @@
-import type { Key, ReactNode } from 'react';
+import type { ComponentProps, Key, ReactNode } from 'react';
 import { cn } from 'cn';
 import {
   Table,
@@ -27,7 +27,7 @@ interface DataTableProps<T> {
   error: Error | null;
   onRetry: () => void;
   errorTitle: string;
-  empty: { title: string; description: string; action?: ReactNode };
+  empty: ComponentProps<typeof EmptyState>;
 }
 
 // Tabela de lista com os três estados exigidos: carregando, vazia e erro.

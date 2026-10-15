@@ -1,7 +1,8 @@
 import { Fragment } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { CircleCheck, Shield, Swords, UserRound, Users } from 'lucide-react';
-import { useClubs, useMatches } from '@/hooks/use-league';
+import { useClubs } from '@/hooks/use-clubs';
+import { useMatches } from '@/hooks/use-league';
 import { usePlayers } from '@/hooks/use-players';
 import { formatInteger, pluralize } from '@/lib/format';
 

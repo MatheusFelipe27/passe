@@ -1,5 +1,4 @@
 import { ArrowUpDown, ChevronDown } from 'lucide-react';
-import type { PlayerSort } from '@/api/players';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,20 +8,25 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { SORT_NAMES } from './player-labels';
 
-interface SortMenuProps {
-  value: PlayerSort;
-  onChange: (sort: PlayerSort) => void;
+interface SortMenuProps<T extends string> {
+  value: T;
+  options: Record<T, string>;
+  onChange: (sort: T) => void;
 }
 
-export function SortMenu({ value, onChange }: SortMenuProps) {
+// Menu "Ordenar": as opções vão para a API, que devolve a lista já na ordem escolhida.
+export function SortMenu<T extends string>({
+  value,
+  options,
+  onChange,
+}: SortMenuProps<T>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="border-input font-normal">
           <ArrowUpDown aria-hidden />
-          Ordenar: {lowerFirst(SORT_NAMES[value])}
+          Ordenar: {lowerFirst(options[value])}
           <ChevronDown aria-hidden className="text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
@@ -30,11 +34,11 @@ export function SortMenu({ value, onChange }: SortMenuProps) {
         <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={value}
-          onValueChange={(next) => onChange(next as PlayerSort)}
+          onValueChange={(next) => onChange(next as T)}
         >
-          {(Object.keys(SORT_NAMES) as PlayerSort[]).map((sort) => (
+          {(Object.keys(options) as T[]).map((sort) => (
             <DropdownMenuRadioItem key={sort} value={sort}>
-              {SORT_NAMES[sort]}
+              {options[sort]}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

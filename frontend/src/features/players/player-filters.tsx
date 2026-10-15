@@ -6,7 +6,7 @@ import {
   Shirt,
   UserRound,
 } from 'lucide-react';
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import type { Condition, Position } from '@/api/players';
 import { OptionFilter } from '@/components/filters/option-filter';
 import { RangeFilter } from '@/components/filters/range-filter';

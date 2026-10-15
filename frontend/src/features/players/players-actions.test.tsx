@@ -479,6 +479,28 @@ describe('ações da tela de jogadores', () => {
     await waitFor(() => expect(listCalls()).toBeGreaterThan(before));
   });
 
+  it('rebusca os clubes depois de uma ação, porque o valor do jogador entra no patrimônio', async () => {
+    const fetchMock = renderPlayers({
+      'PATCH /players/3/condition': { body: FREE_PLAYER },
+    });
+    await screen.findByText('Ênio Carvalho');
+    const clubCalls = () =>
+      fetchMock.mock.calls.filter(([input]) =>
+        new URL(String(input)).pathname.endsWith('/clubs'),
+      ).length;
+    const before = clubCalls();
+
+    await openRowAction('Ênio Carvalho', 'Alterar condição');
+    await userEvent.click(
+      screen.getByRole('radio', { name: /Mal condicionado/ }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Salvar condição' }),
+    );
+
+    await waitFor(() => expect(clubCalls()).toBeGreaterThan(before));
+  });
+
   it('abre os detalhes com os dados de GET /players/{id}', async () => {
     renderPlayers();
     await openRowAction('Ênio Carvalho', 'Ver detalhes');

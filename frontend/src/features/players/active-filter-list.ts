@@ -1,4 +1,4 @@
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import { describeRange } from '@/components/filters/describe-range';
 import { CONDITION_NAMES } from './player-labels';
 import { formatAge, formatMoneyText } from './range-parsers';

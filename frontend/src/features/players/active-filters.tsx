@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import { Button } from '@/components/ui/button';
 import { listActiveFilters } from './active-filter-list';
 import type { PlayerListState } from './use-player-list-state';

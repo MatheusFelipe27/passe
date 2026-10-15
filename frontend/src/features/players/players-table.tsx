@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Club } from '@/api/league';
+import type { Club } from '@/api/clubs';
 import type { Player } from '@/api/players';
 import { DataTable, type Column } from '@/components/data-table';
 import { formatMoney } from '@/lib/format';

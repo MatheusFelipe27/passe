@@ -14,6 +14,30 @@ export function formatMoney(value: number): string {
   return moneyFormat.format(value);
 }
 
+const BRASILIA_TIME_ZONE = 'America/Sao_Paulo';
+
+const dateFormat = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: BRASILIA_TIME_ZONE,
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+const timeFormat = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: BRASILIA_TIME_ZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+// Datas sempre no horário de Brasília, qualquer que seja o fuso do navegador (07/11/2026).
+export function formatDate(instant: string | number): string {
+  return dateFormat.format(new Date(instant));
+}
+
+export function formatTime(instant: string | number): string {
+  return timeFormat.format(new Date(instant));
+}
+
 export function pluralize(
   count: number,
   singular: string,

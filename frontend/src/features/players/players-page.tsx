@@ -1,9 +1,10 @@
 import { Plus, Users } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { PaginationBar } from '@/components/pagination-bar';
+import { SortMenu } from '@/components/sort-menu';
 import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
-import { useClubs } from '@/hooks/use-league';
+import { useClubs } from '@/hooks/use-clubs';
 import { usePlayers } from '@/hooks/use-players';
 import { hasActiveFilters } from './active-filter-list';
 import { ActiveFilters } from './active-filters';
@@ -14,9 +15,10 @@ import { NewPlayerDialog } from './new-player-dialog';
 import { PlayerCreatedDialog } from './player-created-dialog';
 import { PlayerDetailsSheet } from './player-details-sheet';
 import { PlayerFilters } from './player-filters';
+import { SORT_NAMES } from './player-labels';
 import { PlayersTable } from './players-table';
 import { SituationTabs } from './situation-tabs';
-import { SortMenu } from './sort-menu';
+
 import { usePlayerDialogs } from './use-player-dialogs';
 import {
   PAGE_SIZE,
@@ -84,7 +86,11 @@ export function PlayersPage() {
             freeDisabled={state.clubId !== undefined}
             onChange={(situation) => update({ situation })}
           />
-          <SortMenu value={state.sort} onChange={(sort) => update({ sort })} />
+          <SortMenu
+            value={state.sort}
+            options={SORT_NAMES}
+            onChange={(sort) => update({ sort })}
+          />
         </div>
         <PlayersTable
           players={list.data?.data}

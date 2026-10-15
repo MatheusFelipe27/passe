@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { CircleAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -19,9 +20,30 @@ interface EmptyStateProps {
   title: string;
   description: string;
   action?: ReactNode;
+  icon?: LucideIcon;
 }
 
-export function EmptyState({ title, description, action }: EmptyStateProps) {
+// Sem ícone, a versão compacta das tabelas; com ícone, a versão centralizada que ocupa o quadro.
+export function EmptyState({
+  title,
+  description,
+  action,
+  icon: Icon,
+}: EmptyStateProps) {
+  if (Icon) {
+    return (
+      <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
+        <span className="mb-2 flex size-12 items-center justify-center rounded-xl bg-muted">
+          <Icon aria-hidden className="size-6 text-muted-foreground" />
+        </span>
+        <span className="text-base font-semibold">{title}</span>
+        <span className="max-w-[420px] text-sm text-muted-foreground">
+          {description}
+        </span>
+        {action && <div className="mt-2">{action}</div>}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-start gap-1 p-4">
       <span className="text-sm font-medium">{title}</span>
