@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Clock } from '../../common/time/clock';
 import { TransactionRunner } from '../../prisma/transaction-runner';
 import {
   ClubDetailView,
@@ -24,6 +25,7 @@ export class ClubsService {
   constructor(
     private readonly clubs: ClubsRepository,
     private readonly transactions: TransactionRunner,
+    private readonly clock: Clock,
   ) {}
 
   // RN10: o clube nasce com 300,00 em caixa (padrão do banco) e sem jogadores.
@@ -66,6 +68,6 @@ export class ClubsService {
     if (!club) {
       throw new NotFoundException('Clube não encontrado.');
     }
-    return toClubDetailView(club, club.players, new Date());
+    return toClubDetailView(club, club.players, this.clock.now());
   }
 }

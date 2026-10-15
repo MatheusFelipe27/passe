@@ -3,6 +3,7 @@ import {
   clearDatabase,
   createTestPrisma,
 } from '../../../test/integration/test-database';
+import { Clock } from '../../common/time/clock';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TransactionRunner } from '../../prisma/transaction-runner';
 import { ClubsRepository } from './clubs.repository';
@@ -91,6 +92,7 @@ describe('clubes no banco', () => {
     service = new ClubsService(
       new ClubsRepository(prisma),
       new TransactionRunner(prisma),
+      new Clock(),
     );
   });
 

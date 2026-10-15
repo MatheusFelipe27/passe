@@ -1,4 +1,4 @@
-import { money } from '../../common/money/money';
+import { Money, money } from '../../common/money/money';
 import { Player } from '../../generated/prisma/client';
 import { calculateMarketValue } from './domain/market-value';
 import { calculateOverall } from './domain/overall';
@@ -24,16 +24,19 @@ export interface PlayerView {
   club_id: number | null;
 }
 
-export function toPlayerView(player: Player): PlayerView {
-  const position = player.position as Position;
-  const condition = player.condition as Condition;
-  const baseValue = money(player.baseValue.toString());
-  const marketValue = calculateMarketValue({
-    baseValue,
-    condition,
+// RN05: valor de mercado do jogador agora, pela condição, agilidade e idade atuais.
+export function marketValueOf(player: Player): Money {
+  return calculateMarketValue({
+    baseValue: money(player.baseValue.toString()),
+    condition: player.condition as Condition,
     agility: player.agility,
     age: player.age,
   });
+}
+
+export function toPlayerView(player: Player): PlayerView {
+  const position = player.position as Position;
+  const condition = player.condition as Condition;
 
   return {
     id: player.id,
@@ -42,8 +45,8 @@ export function toPlayerView(player: Player): PlayerView {
     agility: player.agility,
     age: player.age,
     condition,
-    base_value: baseValue.toNumber(),
-    market_value: marketValue.toNumber(),
+    base_value: money(player.baseValue.toString()).toNumber(),
+    market_value: marketValueOf(player).toNumber(),
     pace: player.pace,
     shooting: player.shooting,
     passing: player.passing,

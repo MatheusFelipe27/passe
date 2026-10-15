@@ -9,5 +9,6 @@ import { PlayersService } from './players.service';
   imports: [ClubsModule, LineupsModule],
   controllers: [PlayersController],
   providers: [PlayersService, PlayersRepository],
+  exports: [PlayersRepository],
 })
 export class PlayersModule {}
