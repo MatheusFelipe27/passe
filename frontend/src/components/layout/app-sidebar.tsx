@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Clock,
   ListOrdered,
+  Plus,
   Shield,
   Swords,
   Trophy,
@@ -11,12 +12,15 @@ import {
 import { Link, useMatch } from 'react-router';
 import { cn } from 'cn';
 import { Logo } from '@/components/brand/logo';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useClubs, useMatches } from '@/hooks/use-league';
+import { useNewClubDialog } from '@/features/clubs/new-club-dialog-context';
+import { useClubs } from '@/hooks/use-clubs';
+import { useMatches } from '@/hooks/use-league';
 import { usePlayers } from '@/hooks/use-players';
 import { formatInteger, pluralize } from '@/lib/format';
 
@@ -31,7 +35,9 @@ export function AppSidebar({ collapsed }: AppSidebarProps) {
   const players = usePlayers(COUNT_ONLY);
   const clubs = useClubs();
   const matches = useMatches();
+  const { openNewClub } = useNewClubDialog();
   const playerCount = players.data?.meta.total_items;
+  const hasClubs = (clubs.data?.length ?? 0) > 0;
 
   return (
     <aside
@@ -78,9 +84,25 @@ export function AppSidebar({ collapsed }: AppSidebarProps) {
           collapsed={collapsed}
         />
       </SidebarGroup>
-      {clubs.data && clubs.data.length > 0 && (
-        <SidebarGroup label="Clubes" collapsed={collapsed}>
-          {clubs.data.map((club) => (
+      {/* Só a lista de clubes rola: com até 20 clubes, o resto da barra continua sempre visível. */}
+      {!collapsed || hasClubs ? (
+        <SidebarGroup
+          label="Clubes"
+          collapsed={collapsed}
+          scrollable
+          action={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Novo clube"
+              className="size-6 text-muted-foreground"
+              onClick={openNewClub}
+            >
+              <Plus aria-hidden />
+            </Button>
+          }
+        >
+          {clubs.data?.map((club) => (
             <SidebarLink
               key={club.id}
               to={`/clubes/${club.id}`}
@@ -89,9 +111,15 @@ export function AppSidebar({ collapsed }: AppSidebarProps) {
               collapsed={collapsed}
             />
           ))}
+          {clubs.data && !hasClubs && (
+            <span className="px-2 py-1.5 text-xs text-muted-foreground">
+              Nenhum clube ainda.
+            </span>
+          )}
         </SidebarGroup>
+      ) : (
+        <div className="flex-1" />
       )}
-      <div className="flex-1" />
       {!collapsed && (
         <footer className="p-2">
           <div className="flex flex-col gap-2.5 rounded-xl border border-sidebar-border bg-background p-3 shadow-xs">
@@ -120,23 +148,40 @@ export function AppSidebar({ collapsed }: AppSidebarProps) {
 function SidebarGroup({
   label,
   collapsed,
+  action,
+  scrollable = false,
   children,
 }: {
   label: string;
   collapsed: boolean;
+  action?: ReactNode;
+  scrollable?: boolean;
   children: ReactNode;
 }) {
   return (
     <nav
       aria-label={label}
-      className={cn('flex flex-col gap-0.5', collapsed ? 'px-1.5 py-2' : 'p-2')}
+      className={cn(
+        'flex flex-col gap-0.5',
+        collapsed ? 'px-1.5 py-2' : 'p-2',
+        scrollable && 'min-h-0 flex-1',
+      )}
     >
       {!collapsed && (
-        <span className="flex h-8 items-center px-2 text-xs text-muted-foreground">
+        <span className="flex h-8 shrink-0 items-center justify-between px-2 text-xs text-muted-foreground">
           {label}
+          {action}
         </span>
       )}
-      {children}
+      <div
+        className={cn(
+          'flex flex-col gap-0.5',
+          scrollable &&
+            '-mx-1 min-h-0 overflow-y-auto px-1 py-0.5 [scrollbar-width:thin]',
+        )}
+      >
+        {children}
+      </div>
     </nav>
   );
 }
@@ -160,13 +205,23 @@ function SidebarLink({
 }: SidebarLinkProps) {
   // As classes vão como texto: o Tooltip do Radix junta classes e não aceita a função do NavLink.
   const isActive = useMatch({ path: to, end: false }) !== null;
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  // O clube aberto fica à vista mesmo quando a lista de clubes precisa rolar.
+  useEffect(() => {
+    if (isActive) {
+      ref.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [isActive]);
+
   const link = (
     <Link
+      ref={ref}
       to={to}
       aria-label={collapsed ? label : undefined}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'flex h-8 items-center gap-2 rounded-lg border text-sm',
+        'flex h-8 shrink-0 items-center gap-2 rounded-lg border text-sm',
         collapsed ? 'justify-center' : 'px-2',
         isActive
           ? 'border-sidebar-border bg-background font-medium shadow-xs'
