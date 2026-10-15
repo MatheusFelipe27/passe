@@ -118,7 +118,9 @@
   /* Todo elemento clicável habilitado mostra a mãozinha (o Tailwind 4 deixa a seta nos botões). */
   button:not(:disabled),
   [role='tab']:not(:disabled),
-  [role='menuitemradio']:not([data-disabled]) {
+  [role='menuitem']:not([data-disabled]),
+  [role='menuitemradio']:not([data-disabled]),
+  [role='radio']:not(:disabled) {
     cursor: pointer;
   }
 }

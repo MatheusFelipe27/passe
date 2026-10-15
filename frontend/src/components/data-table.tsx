@@ -62,7 +62,7 @@ export function DataTable<T>({
             <TableHead
               key={column.key}
               className={cn(
-                'h-10 px-4 font-normal text-muted-foreground',
+                'h-10 px-2 font-normal text-muted-foreground first:pl-4 last:pr-4',
                 column.align === 'right' && 'text-right',
                 column.className,
               )}
@@ -79,7 +79,7 @@ export function DataTable<T>({
               <TableCell
                 key={column.key}
                 className={cn(
-                  'px-4',
+                  'px-2 first:pl-4 last:pr-4',
                   column.align === 'right' && 'text-right',
                   column.className,
                 )}
