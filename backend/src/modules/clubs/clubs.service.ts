@@ -35,15 +35,16 @@ export class ClubsService {
           `A liga já tem ${MAX_CLUBS} clubes, o máximo permitido.`,
         );
       }
+      // Recusa de um campo só: a mensagem começa pelo campo, como nas recusas de validação.
       const normalizedName = toClubNameKey(input.name);
       if (await this.clubs.existsByNormalizedName(normalizedName, db)) {
         throw new ConflictException(
-          `Já existe um clube com o nome ${input.name}.`,
+          `name: já existe um clube com o nome ${input.name}`,
         );
       }
       if (await this.clubs.existsByAcronym(input.acronym, db)) {
         throw new ConflictException(
-          `Já existe um clube com a sigla ${input.acronym}.`,
+          `acronym: já existe um clube com a sigla ${input.acronym}`,
         );
       }
       const club = await this.clubs.create(

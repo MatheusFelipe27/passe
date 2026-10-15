@@ -125,7 +125,7 @@ describe('clubes no banco', () => {
       await create('Águias FC', 'AGU');
 
       await expect(create('  águias   fc ', 'ASC')).rejects.toThrow(
-        ConflictException,
+        new ConflictException('name: já existe um clube com o nome águias fc'),
       );
       await expect(create('Aguias FC', 'AGI')).resolves.toMatchObject({
         name: 'Aguias FC',
@@ -137,7 +137,7 @@ describe('clubes no banco', () => {
       await create('Águias FC', 'AGU');
 
       await expect(create('Águia Gaúcha', 'AGU')).rejects.toThrow(
-        ConflictException,
+        new ConflictException('acronym: já existe um clube com a sigla AGU'),
       );
       expect(await prisma.club.count()).toBe(1);
     });
@@ -149,7 +149,7 @@ describe('clubes no banco', () => {
 
       await expect(create(...GREEK_CLUBS[19])).resolves.toBeDefined();
       await expect(create('Águias FC', 'AGU')).rejects.toThrow(
-        ConflictException,
+        new ConflictException('A liga já tem 20 clubes, o máximo permitido.'),
       );
       expect(await prisma.club.count()).toBe(20);
     });
