@@ -1,4 +1,9 @@
-import type { Condition, PlayerSort, Position } from '@/api/players';
+import type {
+  Condition,
+  PlayerAttributes,
+  PlayerSort,
+  Position,
+} from '@/api/players';
 
 export const POSITIONS: Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA'];
 
@@ -25,4 +30,13 @@ export const SORT_NAMES: Record<PlayerSort, string> = {
   age_desc: 'Maior idade',
   age_asc: 'Menor idade',
   position: 'Posição (GOL a ATA)',
+};
+
+export const ATTRIBUTE_NAMES: Record<keyof PlayerAttributes, string> = {
+  pace: 'Velocidade',
+  shooting: 'Finalização',
+  passing: 'Passe',
+  dribbling: 'Drible',
+  defending: 'Defesa',
+  physical: 'Físico',
 };

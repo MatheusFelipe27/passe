@@ -24,18 +24,24 @@ const CONDITION_STYLES: Record<Condition, string> = {
 const HIGH_AGILITY = 80;
 const LOW_AGILITY = 30;
 
+export function PlayerAvatar({ player }: { player: Player }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium',
+        AVATAR_COLORS[player.id % AVATAR_COLORS.length],
+      )}
+    >
+      {initials(player.name)}
+    </span>
+  );
+}
+
 export function PlayerIdentity({ player }: { player: Player }) {
   return (
     <div className="flex items-center gap-3">
-      <span
-        aria-hidden
-        className={cn(
-          'flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium',
-          AVATAR_COLORS[player.id % AVATAR_COLORS.length],
-        )}
-      >
-        {initials(player.name)}
-      </span>
+      <PlayerAvatar player={player} />
       <div className="flex flex-col">
         <span className="font-medium">{player.name}</span>
         <span className="text-xs text-muted-foreground">

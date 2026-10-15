@@ -1,15 +1,23 @@
-import { Users } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { PaginationBar } from '@/components/pagination-bar';
+import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useClubs } from '@/hooks/use-league';
 import { usePlayers } from '@/hooks/use-players';
 import { hasActiveFilters } from './active-filter-list';
 import { ActiveFilters } from './active-filters';
+import { ConditionDialog } from './condition-dialog';
+import { DeletePlayerDialog } from './delete-player-dialog';
+import { EditPlayerDialog } from './edit-player-dialog';
+import { NewPlayerDialog } from './new-player-dialog';
+import { PlayerCreatedDialog } from './player-created-dialog';
+import { PlayerDetailsSheet } from './player-details-sheet';
 import { PlayerFilters } from './player-filters';
 import { PlayersTable } from './players-table';
 import { SituationTabs } from './situation-tabs';
 import { SortMenu } from './sort-menu';
+import { usePlayerDialogs } from './use-player-dialogs';
 import {
   PAGE_SIZE,
   situationFilter,
@@ -25,6 +33,7 @@ export function PlayersPage() {
   const search = useDebouncedValue(state.search?.trim() ?? '', SEARCH_DELAY_MS);
   const filters = toPlayerFilters(state, search);
   const clubs = useClubs();
+  const dialogs = usePlayerDialogs();
 
   const list = usePlayers({
     ...filters,
@@ -48,6 +57,12 @@ export function PlayersPage() {
         icon={Users}
         title="Jogadores"
         description="Cadastre jogadores, acompanhe os indicadores e compre os que estão livres."
+        actions={
+          <Button onClick={dialogs.openCreate}>
+            <Plus aria-hidden />
+            Novo jogador
+          </Button>
+        }
       />
       <PlayerFilters state={state} clubs={clubs.data} onChange={update} />
       <ActiveFilters state={state} clubs={clubs.data} onChange={update} />
@@ -79,6 +94,7 @@ export function PlayersPage() {
           error={list.error}
           onRetry={() => void list.refetch()}
           hasFilters={hasActiveFilters(state) || state.situation !== 'all'}
+          onAction={dialogs.openAction}
         />
         {meta && !list.error && meta.total_items > 0 && (
           <PaginationBar
@@ -95,6 +111,35 @@ export function PlayersPage() {
         Overall e valor de mercado são calculados a cada consulta. A busca
         ignora maiúsculas, minúsculas e acentos.
       </p>
+      <NewPlayerDialog
+        open={dialogs.isCreating}
+        onOpenChange={(open) => !open && dialogs.close()}
+        onCreated={dialogs.showCreated}
+      />
+      <PlayerCreatedDialog
+        player={dialogs.createdPlayer}
+        onClose={dialogs.close}
+        onShowDetails={(player) => dialogs.openAction('details', player)}
+      />
+      <PlayerDetailsSheet
+        playerId={dialogs.detailsPlayerId}
+        clubs={clubs.data}
+        onClose={dialogs.close}
+        onEdit={(player) => dialogs.openAction('edit', player)}
+        onChangeCondition={(player) => dialogs.openAction('condition', player)}
+      />
+      <EditPlayerDialog
+        player={dialogs.editingPlayer}
+        onClose={dialogs.close}
+      />
+      <ConditionDialog
+        player={dialogs.conditionPlayer}
+        onClose={dialogs.close}
+      />
+      <DeletePlayerDialog
+        player={dialogs.deletingPlayer}
+        onClose={dialogs.close}
+      />
     </div>
   );
 }

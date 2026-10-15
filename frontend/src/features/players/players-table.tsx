@@ -10,6 +10,7 @@ import {
   PlayerIdentity,
   PositionBadge,
 } from './player-cells';
+import { PlayerRowActions, type PlayerAction } from './player-row-actions';
 
 interface PlayersTableProps {
   players: Player[] | undefined;
@@ -19,12 +20,14 @@ interface PlayersTableProps {
   error: Error | null;
   onRetry: () => void;
   hasFilters: boolean;
+  onAction: (action: PlayerAction, player: Player) => void;
 }
 
 export function PlayersTable({
   players,
   clubs,
   hasFilters,
+  onAction,
   ...state
 }: PlayersTableProps) {
   const clubsById = useMemo(
@@ -89,6 +92,14 @@ export function PlayersTable({
       header: 'Clube',
       cell: (player) => (
         <PlayerClub clubId={player.club_id} clubs={clubsById} />
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      cell: (player) => (
+        <PlayerRowActions player={player} onAction={onAction} />
       ),
     },
   ];
