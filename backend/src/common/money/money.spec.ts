@@ -1,4 +1,4 @@
-import { money, roundMoney } from './money';
+import { formatMoneyText, money, roundMoney } from './money';
 
 describe('roundMoney', () => {
   it.each([
@@ -22,5 +22,18 @@ describe('roundMoney', () => {
     ['40', '40.00'],
   ])('arredonda %s para %s', (value, expected) => {
     expect(roundMoney(money(value)).toFixed(2)).toBe(expected);
+  });
+});
+
+describe('formatMoneyText', () => {
+  it.each([
+    ['0', '0,00'],
+    ['1', '1,00'],
+    ['38.85', '38,85'],
+    ['130.575', '130,58'],
+    ['-45.55', '-45,55'],
+    ['1744.14', '1744,14'],
+  ])('%s → %s', (value, text) => {
+    expect(formatMoneyText(money(value))).toBe(text);
   });
 });

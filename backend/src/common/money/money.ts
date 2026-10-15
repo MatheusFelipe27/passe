@@ -12,3 +12,8 @@ export function money(value: Decimal.Value): Money {
 export function roundMoney(value: Decimal): Money {
   return value.toDecimalPlaces(MONEY_DECIMAL_PLACES, Decimal.ROUND_HALF_UP);
 }
+
+// Valores em moedas nas mensagens de recusa: 2 casas e vírgula decimal (130,58).
+export function formatMoneyText(value: Money): string {
+  return roundMoney(value).toFixed(MONEY_DECIMAL_PLACES).replace('.', ',');
+}
