@@ -4,6 +4,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { validateEnv } from './config/env';
+import { ClubsModule } from './modules/clubs/clubs.module';
 import { PlayersModule } from './modules/players/players.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -12,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     PrismaModule,
     PlayersModule,
+    ClubsModule,
   ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
