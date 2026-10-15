@@ -7,9 +7,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { Prisma } from '../../generated/prisma/client';
 
 const INTERNAL_ERROR_MESSAGE = 'Erro interno do servidor.';
 const INVALID_REQUEST_MESSAGE = 'Requisição inválida.';
+const DUPLICATE_MESSAGE = 'Já existe um registro com esses dados.';
+const UNIQUE_VIOLATION = 'P2002';
 
 interface ErrorReply {
   status: number;
@@ -32,6 +35,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: exception.getStatus(),
         message: readHttpExceptionMessage(exception),
       };
+    }
+    // Unicidade garantida pelo banco (RN10): uma gravação simultânea que escapou das conferências.
+    if (
+      exception instanceof Prisma.PrismaClientKnownRequestError &&
+      exception.code === UNIQUE_VIOLATION
+    ) {
+      return { status: HttpStatus.CONFLICT, message: DUPLICATE_MESSAGE };
     }
     const clientStatus = readClientErrorStatus(exception);
     if (clientStatus !== null) {

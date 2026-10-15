@@ -37,3 +37,18 @@ export function removeAccents(text: string): string {
 export function toSortKey(text: string): string {
   return removeAccents(text.toLowerCase());
 }
+
+// Premissas: compara as chaves caractere a caractere pela ordem Unicode (ponto de código),
+// e não pela unidade UTF-16 que o operador < do JavaScript usa.
+export function compareSortKeys(a: string, b: string): number {
+  const left = Array.from(a);
+  const right = Array.from(b);
+  for (let index = 0; index < Math.min(left.length, right.length); index++) {
+    const difference =
+      left[index].codePointAt(0)! - right[index].codePointAt(0)!;
+    if (difference !== 0) {
+      return difference;
+    }
+  }
+  return left.length - right.length;
+}
