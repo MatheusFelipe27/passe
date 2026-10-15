@@ -1,0 +1,193 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  ChevronLeft,
+  Coins,
+  Landmark,
+  ShieldOff,
+  Shirt,
+  Wallet,
+} from 'lucide-react';
+import { Link, useParams } from 'react-router';
+import type { ClubDetail } from '@/api/clubs';
+import { ApiError } from '@/api/http-client';
+import { EmptyState } from '@/components/list-states';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useClub } from '@/hooks/use-clubs';
+import {
+  formatDate,
+  formatInteger,
+  formatMoney,
+  formatTime,
+} from '@/lib/format';
+import { ClubAvatar } from './club-cells';
+import { MAX_SQUAD } from './club-labels';
+import { RosterTable } from './roster-table';
+
+// RN15: a multa da venda é limitada a 10,00.
+const PENALTY_CAP = 10;
+
+export function ClubPage() {
+  const { id = '' } = useParams();
+  const club = useClub(id);
+
+  if (club.error instanceof ApiError && club.error.status === 404) {
+    return (
+      <section className="rounded-xl border bg-card shadow-xs">
+        <EmptyState
+          icon={ShieldOff}
+          title="Clube não encontrado"
+          description="O clube pedido não existe. Volte à lista e escolha outro clube."
+          action={
+            <Button asChild variant="outline">
+              <Link to="/clubes">
+                <ChevronLeft aria-hidden />
+                Ver clubes
+              </Link>
+            </Button>
+          }
+        />
+      </section>
+    );
+  }
+
+  const players = club.data?.players;
+  const hasPlayers = players !== undefined && players.length > 0;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {club.data && (
+        <>
+          <ClubHeader club={club.data} />
+          <ClubStats club={club.data} />
+        </>
+      )}
+      <Tabs value="roster">
+        <TabsList variant="line" className="w-full justify-start border-b">
+          <TabsTrigger value="roster" className="flex-none px-3">
+            <Shirt aria-hidden />
+            Elenco
+            {players && (
+              <Badge
+                variant="secondary"
+                className="rounded-md bg-primary-soft text-primary"
+              >
+                {formatInteger(players.length)}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <section
+        aria-label="Elenco"
+        className="overflow-hidden rounded-xl border bg-card shadow-xs"
+      >
+        {hasPlayers && (
+          <header className="flex flex-col gap-0.5 border-b px-4 py-3">
+            <h2 className="font-semibold">Elenco</h2>
+            <p className="text-xs text-muted-foreground">
+              Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome.
+              Contrato calculado para uma venda agora.
+            </p>
+          </header>
+        )}
+        <RosterTable
+          players={players}
+          isLoading={club.isPending}
+          isRefreshing={club.isFetching && !club.isPending}
+          error={club.error}
+          onRetry={() => void club.refetch()}
+        />
+      </section>
+      {hasPlayers && (
+        <p className="text-xs text-muted-foreground">
+          Valor de mercado, dias restantes e % de multa calculados pela API para
+          uma venda agora ({formatDate(club.dataUpdatedAt)},{' '}
+          {formatTime(club.dataUpdatedAt)}). A multa tem teto de{' '}
+          {formatMoney(PENALTY_CAP)}.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ClubHeader({ club }: { club: ClubDetail }) {
+  return (
+    <div className="flex items-center gap-4">
+      <ClubAvatar acronym={club.acronym} size="lg" />
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl leading-8 font-semibold tracking-[-0.025em]">
+          {club.name}
+        </h1>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="rounded-md">
+            Sigla {club.acronym}
+          </Badge>
+          <Badge variant="outline" className="rounded-md">
+            <Shirt aria-hidden />
+            {formatInteger(club.players.length)} de {MAX_SQUAD} jogadores
+          </Badge>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClubStats({ club }: { club: ClubDetail }) {
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      <StatCard
+        label="Caixa"
+        icon={Wallet}
+        value={formatMoney(club.cash)}
+        unit="moedas"
+        help="Só muda por compras e vendas"
+      />
+      <StatCard
+        label="Valor do elenco"
+        icon={Coins}
+        value={formatMoney(club.squad_value)}
+        unit="moedas"
+        help="Soma dos valores de mercado"
+      />
+      <StatCard
+        label="Patrimônio"
+        icon={Landmark}
+        value={formatMoney(club.net_worth)}
+        unit="moedas"
+        help="Caixa + valor do elenco"
+      />
+      <StatCard
+        label="Elenco"
+        icon={Shirt}
+        value={`${formatInteger(club.players.length)} de ${MAX_SQUAD}`}
+        help={`Limite de ${MAX_SQUAD} jogadores`}
+      />
+    </div>
+  );
+}
+
+interface StatCardProps {
+  label: string;
+  icon: LucideIcon;
+  value: string;
+  unit?: string;
+  help: string;
+}
+
+function StatCard({ label, icon: Icon, value, unit, help }: StatCardProps) {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border bg-card p-5 shadow-xs">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>{label}</span>
+        <Icon aria-hidden className="size-4" />
+      </div>
+      <p className="flex items-baseline gap-1.5">
+        <span className="text-2xl font-semibold tabular-nums">{value}</span>
+        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
+      </p>
+      <span className="text-xs text-muted-foreground">{help}</span>
+    </div>
+  );
+}
