@@ -57,3 +57,49 @@ export interface PlayerFilters {
 export function listPlayers(filters: PlayerFilters = {}): Promise<PlayerPage> {
   return request<PlayerPage>('/players', { query: { ...filters } });
 }
+
+export interface PlayerAttributes {
+  pace: number;
+  shooting: number;
+  passing: number;
+  dribbling: number;
+  defending: number;
+  physical: number;
+}
+
+export interface PlayerEdit {
+  name: string;
+  position: Position;
+  agility: number;
+  age: number;
+}
+
+export interface NewPlayer extends PlayerEdit, PlayerAttributes {
+  potential: number;
+}
+
+export function getPlayer(id: number): Promise<Player> {
+  return request<Player>(`/players/${id}`);
+}
+
+export function createPlayer(player: NewPlayer): Promise<Player> {
+  return request<Player>('/players', { method: 'POST', body: player });
+}
+
+export function updatePlayer(id: number, edit: PlayerEdit): Promise<Player> {
+  return request<Player>(`/players/${id}`, { method: 'PUT', body: edit });
+}
+
+export function changeCondition(
+  id: number,
+  condition: Condition,
+): Promise<Player> {
+  return request<Player>(`/players/${id}/condition`, {
+    method: 'PATCH',
+    body: { condition },
+  });
+}
+
+export function deletePlayer(id: number): Promise<void> {
+  return request<void>(`/players/${id}`, { method: 'DELETE' });
+}
