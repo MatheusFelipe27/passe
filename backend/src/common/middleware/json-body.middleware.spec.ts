@@ -1,43 +1,42 @@
-import { HttpException } from '@nestjs/common';
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import request from 'supertest';
 import { jsonBodyParser } from './json-body.middleware';
 
 function createApp() {
   const app = express();
   app.use(jsonBodyParser);
-  app.post('/echo', (req: Request, res: Response) => {
-    res.json({ received: req.body as unknown });
-  });
-  app.use(
-    (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-      const status = error instanceof HttpException ? error.getStatus() : 500;
-      const message = error instanceof Error ? error.message : '';
-      res.status(status).json({ message });
-    },
-  );
+  const echo = (req: Request, res: Response) => {
+    const body = req.body as unknown;
+    res.json({ received: body === undefined ? 'nenhum' : body });
+  };
+  app.post('/echo', echo);
+  app.delete('/echo', echo);
   return app;
 }
 
-function post(body: string) {
+function send(method: 'post' | 'delete', body: string) {
   return request(createApp())
-    .post('/echo')
+    [method]('/echo')
     .set('Content-Type', 'application/json')
     .send(body);
 }
 
 describe('jsonBodyParser', () => {
   it.each(['{bad', '{"name": }', '"x"', '10', 'true', "{'name': 'x'}"])(
-    'recusa com 400 o corpo %s',
+    'descarta o corpo inválido %s em vez de recusar o pedido',
     async (body) => {
-      const response = await post(body);
+      const response = await send('post', body);
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({
-        message: 'O corpo da requisição não é um JSON válido.',
-      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ received: 'nenhum' });
     },
   );
+
+  it('deixa a exclusão seguir quando chega com corpo inválido (V1)', async () => {
+    const response = await send('delete', '{bad');
+
+    expect(response.status).toBe(200);
+  });
 
   it.each([
     ['{"name":"Meia Lua"}', { name: 'Meia Lua' }],
@@ -45,15 +44,16 @@ describe('jsonBodyParser', () => {
     ['[]', []],
     ['{}', {}],
   ])('entrega o corpo %s já convertido', async (body, expected) => {
-    const response = await post(body);
+    const response = await send('post', body);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ received: expected });
   });
 
-  it('entrega um objeto vazio quando não há corpo', async () => {
+  it('segue sem corpo quando nada é enviado', async () => {
     const response = await request(createApp()).post('/echo');
 
     expect(response.status).toBe(200);
+    expect(response.body).toEqual({ received: 'nenhum' });
   });
 });
