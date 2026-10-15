@@ -1,4 +1,4 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from '../../../common/time/brasilia-time';
 
 interface PenaltyBand {
   maxDays: number;
