@@ -7,7 +7,18 @@ import {
   clearDatabase,
   createTestPrisma,
 } from '../../../test/integration/test-database';
-import { Clock } from '../../common/time/clock';
+import {
+  addClub as insertClub,
+  addPlayer as insertPlayer,
+  after,
+  DAY,
+  FixedClock,
+  HOUR,
+  loyaltyText,
+  MINUTE,
+  PlayerFields,
+  PURCHASE_TIME,
+} from '../../../test/integration/market-fixtures';
 import { formatBrasiliaDateTime } from '../../common/time/brasilia-time';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TransactionRunner } from '../../prisma/transaction-runner';
@@ -19,40 +30,6 @@ import { buyPlayerSchema } from './dto/buy-player.schema';
 import { MarketRepository } from './market.repository';
 import { MarketService } from './market.service';
 
-const MINUTE = 60 * 1000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
-
-// O momento da compra do exemplo 2.3.1: 2026-11-02, 10:15 em Brasília.
-const PURCHASE_TIME = new Date('2026-11-02T13:15:00.000Z');
-
-class FixedClock extends Clock {
-  current = PURCHASE_TIME;
-
-  now(): Date {
-    return this.current;
-  }
-}
-
-interface PlayerFields {
-  name?: string;
-  position?: string;
-  baseValue: string;
-  condition?: string;
-  agility?: number;
-  age?: number;
-  clubId?: number | null;
-}
-
-// Texto do loyalty_until no formato da RN01, a partir de um instante sem segundos.
-function loyaltyText(instant: Date): string {
-  return `${formatBrasiliaDateTime(instant).slice(0, 16)}-03:00`;
-}
-
-function after(ms: number, from = PURCHASE_TIME): Date {
-  return new Date(from.getTime() + ms);
-}
-
 describe('mercado no banco', () => {
   let prisma: PrismaService;
   let clock: FixedClock;
@@ -60,33 +37,12 @@ describe('mercado no banco', () => {
   let market: MarketService;
   let clubs: ClubsService;
 
-  async function addClub(name: string, acronym: string, cash = '300.00') {
-    return prisma.club.create({
-      data: { name, normalizedName: name.toLowerCase(), acronym, cash },
-    });
+  function addClub(name: string, acronym: string, cash = '300.00') {
+    return insertClub(prisma, name, acronym, cash);
   }
 
-  async function addPlayer(fields: PlayerFields) {
-    const name = fields.name ?? 'Meia Lua';
-    return prisma.player.create({
-      data: {
-        name,
-        sortName: name.toLowerCase(),
-        position: fields.position ?? 'MEI',
-        agility: fields.agility ?? 50,
-        age: fields.age ?? 25,
-        baseValue: fields.baseValue,
-        condition: fields.condition ?? 'APTO',
-        clubId: fields.clubId ?? null,
-        pace: 50,
-        shooting: 50,
-        passing: 50,
-        dribbling: 50,
-        defending: 50,
-        physical: 50,
-        potential: 80,
-      },
-    });
+  function addPlayer(fields: PlayerFields) {
+    return insertPlayer(prisma, fields);
   }
 
   function buy(playerId: number, clubId: number, loyaltyUntil: Date) {
@@ -119,7 +75,7 @@ describe('mercado no banco', () => {
   beforeEach(async () => {
     await clearDatabase(prisma);
     clock = new FixedClock();
-    marketRepository = new MarketRepository();
+    marketRepository = new MarketRepository(prisma);
     const transactions = new TransactionRunner(prisma);
     market = new MarketService(
       marketRepository,
