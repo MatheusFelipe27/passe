@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Money } from '../../common/money/money';
 import { Club, Contract, Transaction } from '../../generated/prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
 import { DbClient } from '../../prisma/transaction-runner';
 import { ContractEnd } from './domain/sale';
-
-export type TransactionType = 'COMPRA' | 'VENDA';
+import { TransactionType } from './domain/transaction-summary';
 
 export interface NewTransaction {
   clubId: number;
@@ -27,8 +27,34 @@ export interface NewContract {
   startedAt: Date;
 }
 
+export interface TransactionFilter {
+  types?: TransactionType[];
+  playerId?: number;
+}
+
 @Injectable()
 export class MarketRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  findClub(id: number): Promise<Club | null> {
+    return this.prisma.club.findUnique({ where: { id } });
+  }
+
+  // RN17: da mais recente para a mais antiga; no empate de data e hora, o id decrescente.
+  findTransactions(
+    clubId: number,
+    filter: TransactionFilter,
+  ): Promise<Transaction[]> {
+    return this.prisma.transaction.findMany({
+      where: {
+        clubId,
+        playerId: filter.playerId,
+        type: filter.types ? { in: filter.types } : undefined,
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    });
+  }
+
   // Trava o clube até o fim da transação: o caixa e o elenco não mudam no meio da operação.
   async lockClub(id: number, db: DbClient): Promise<Club | null> {
     const locked = await db.$queryRaw<{ id: number }[]>`

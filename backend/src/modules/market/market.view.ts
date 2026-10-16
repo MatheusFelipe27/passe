@@ -2,7 +2,11 @@ import { Money, money } from '../../common/money/money';
 import { formatBrasiliaDateTime } from '../../common/time/brasilia-time';
 import { Contract, Transaction } from '../../generated/prisma/client';
 import { ContractEnd } from './domain/sale';
-import { TransactionType } from './market.repository';
+import {
+  TransactionSummary,
+  TransactionType,
+} from './domain/transaction-summary';
+import { CsvTransaction } from './domain/transactions-csv';
 
 export interface TransactionView {
   id: number;
@@ -92,4 +96,44 @@ export function toSaleView(
 
 function amount(value: { toString(): string }): number {
   return money(value.toString()).toNumber();
+}
+
+export interface TransactionSummaryView {
+  total_spent: number;
+  total_received: number;
+  total_fees: number;
+  total_penalties: number;
+  total_profit: number;
+}
+
+export interface TransactionHistoryView {
+  data: TransactionView[];
+  summary: TransactionSummaryView;
+}
+
+export function toSummaryView(
+  summary: TransactionSummary,
+): TransactionSummaryView {
+  return {
+    total_spent: summary.totalSpent.toNumber(),
+    total_received: summary.totalReceived.toNumber(),
+    total_fees: summary.totalFees.toNumber(),
+    total_penalties: summary.totalPenalties.toNumber(),
+    total_profit: summary.totalProfit.toNumber(),
+  };
+}
+
+// Valores da transação como gravados, para o resumo e o CSV calcularem em decimal exato.
+export function toCsvTransaction(transaction: Transaction): CsvTransaction {
+  return {
+    createdAt: transaction.createdAt,
+    playerName: transaction.playerName,
+    type: transaction.type as TransactionType,
+    value: money(transaction.value.toString()),
+    fee: money(transaction.fee.toString()),
+    penalty: money(transaction.penalty.toString()),
+    profit:
+      transaction.profit === null ? null : money(transaction.profit.toString()),
+    cashChange: money(transaction.cashChange.toString()),
+  };
 }
