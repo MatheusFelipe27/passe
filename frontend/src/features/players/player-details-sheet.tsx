@@ -5,6 +5,7 @@ import {
   Coins,
   HeartPulse,
   Pencil,
+  ShoppingCart,
   Tag,
   TrendingUp,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ interface PlayerDetailsSheetProps {
   onClose: () => void;
   onEdit: (player: Player) => void;
   onChangeCondition: (player: Player) => void;
+  onBuy: (player: Player) => void;
 }
 
 // Painel lateral com o jogador como a API devolve agora (GET /players/{id}).
@@ -42,6 +44,7 @@ export function PlayerDetailsSheet({
   onClose,
   onEdit,
   onChangeCondition,
+  onBuy,
 }: PlayerDetailsSheetProps) {
   return (
     <Sheet
@@ -55,6 +58,7 @@ export function PlayerDetailsSheet({
             clubs={clubs}
             onEdit={onEdit}
             onChangeCondition={onChangeCondition}
+            onBuy={onBuy}
           />
         )}
       </SheetContent>
@@ -67,6 +71,7 @@ function PlayerDetails({
   clubs,
   onEdit,
   onChangeCondition,
+  onBuy,
 }: Omit<PlayerDetailsSheetProps, 'playerId' | 'onClose'> & {
   playerId: number;
 }) {
@@ -178,6 +183,12 @@ function PlayerDetails({
           <HeartPulse aria-hidden />
           Alterar condição
         </Button>
+        {player.club_id === null && (
+          <Button onClick={() => onBuy(player)} className="ml-auto">
+            <ShoppingCart aria-hidden />
+            Comprar
+          </Button>
+        )}
       </SheetFooter>
     </>
   );

@@ -39,6 +39,8 @@ export function PlayersTable({
     {
       key: 'name',
       header: 'Jogador',
+      // Nome longo quebra a linha, para a tabela caber em 1366 px com a coluna de ações.
+      className: 'min-w-36 whitespace-normal',
       cell: (player) => <PlayerIdentity player={player} />,
     },
     {
@@ -90,6 +92,7 @@ export function PlayersTable({
     {
       key: 'club',
       header: 'Clube',
+      className: 'whitespace-normal',
       cell: (player) => (
         <PlayerClub clubId={player.club_id} clubs={clubsById} />
       ),

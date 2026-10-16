@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   ChevronLeft,
@@ -5,11 +6,13 @@ import {
   Landmark,
   ShieldOff,
   Shirt,
+  ShoppingCart,
   Wallet,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router';
-import type { ClubDetail } from '@/api/clubs';
+import type { ClubDetail, RosterPlayer } from '@/api/clubs';
 import { ApiError } from '@/api/http-client';
+import type { Sale } from '@/api/market';
 import { EmptyState } from '@/components/list-states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +24,8 @@ import {
   formatMoney,
   formatTime,
 } from '@/lib/format';
+import { SaleResultDialog } from '@/features/market/sale-result-dialog';
+import { SellPlayerDialog } from '@/features/market/sell-player-dialog';
 import { ClubAvatar } from './club-cells';
 import { MAX_SQUAD } from './club-labels';
 import { RosterTable } from './roster-table';
@@ -31,6 +36,8 @@ const PENALTY_CAP = 10;
 export function ClubPage() {
   const { id = '' } = useParams();
   const club = useClub(id);
+  const [selling, setSelling] = useState<RosterPlayer>();
+  const [sale, setSale] = useState<Sale>();
 
   if (club.error instanceof ApiError && club.error.status === 404) {
     return (
@@ -98,6 +105,7 @@ export function ClubPage() {
           isRefreshing={club.isFetching && !club.isPending}
           error={club.error}
           onRetry={() => void club.refetch()}
+          onSell={setSelling}
         />
       </section>
       {hasPlayers && (
@@ -108,6 +116,20 @@ export function ClubPage() {
           {formatMoney(PENALTY_CAP)}.
         </p>
       )}
+      <SellPlayerDialog
+        player={selling}
+        clubName={club.data?.name ?? ''}
+        onClose={() => setSelling(undefined)}
+        onSold={(result) => {
+          setSelling(undefined);
+          setSale(result);
+        }}
+      />
+      <SaleResultDialog
+        sale={sale}
+        clubName={club.data?.name ?? ''}
+        onClose={() => setSale(undefined)}
+      />
     </div>
   );
 }
@@ -130,6 +152,12 @@ function ClubHeader({ club }: { club: ClubDetail }) {
           </Badge>
         </div>
       </div>
+      <Button asChild className="ml-auto">
+        <Link to="/jogadores?free=true">
+          <ShoppingCart aria-hidden />
+          Comprar jogadores
+        </Link>
+      </Button>
     </div>
   );
 }

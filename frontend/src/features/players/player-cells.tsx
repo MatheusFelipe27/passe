@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { cn } from 'cn';
 import type { Club } from '@/api/clubs';
 import type { Condition, Player } from '@/api/players';
@@ -104,7 +105,12 @@ export function PlayerClub({
           {club.acronym}
         </span>
       )}
-      <span>{club?.name ?? `Clube ${clubId}`}</span>
+      <Link
+        to={`/clubes/${clubId}`}
+        className="underline-offset-4 hover:underline"
+      >
+        {club?.name ?? `Clube ${clubId}`}
+      </Link>
     </span>
   );
 }

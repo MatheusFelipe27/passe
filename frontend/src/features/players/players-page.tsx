@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useClubs } from '@/hooks/use-clubs';
 import { usePlayers } from '@/hooks/use-players';
+import { BuyPlayerDialog } from '@/features/market/buy-player-dialog';
+import { PurchaseResultDialog } from '@/features/market/purchase-result-dialog';
 import { hasActiveFilters } from './active-filter-list';
 import { ActiveFilters } from './active-filters';
 import { ConditionDialog } from './condition-dialog';
@@ -133,6 +135,7 @@ export function PlayersPage() {
         onClose={dialogs.close}
         onEdit={(player) => dialogs.openAction('edit', player)}
         onChangeCondition={(player) => dialogs.openAction('condition', player)}
+        onBuy={(player) => dialogs.openAction('buy', player)}
       />
       <EditPlayerDialog
         player={dialogs.editingPlayer}
@@ -140,6 +143,15 @@ export function PlayersPage() {
       />
       <ConditionDialog
         player={dialogs.conditionPlayer}
+        onClose={dialogs.close}
+      />
+      <BuyPlayerDialog
+        player={dialogs.buyingPlayer}
+        onClose={dialogs.close}
+        onBought={dialogs.showBought}
+      />
+      <PurchaseResultDialog
+        result={dialogs.boughtPlayer}
         onClose={dialogs.close}
       />
       <DeletePlayerDialog

@@ -138,18 +138,21 @@ describe('ClubPage', () => {
       '03/11/202811:20',
       '1.089',
       '20%',
+      'Vender',
     ]);
     expect(cellsOf(rosterRows()[1]).slice(5)).toEqual([
       '44,20',
       '04/04/202715:45',
       '144',
       '10%',
+      'Vender',
     ]);
     expect(cellsOf(rosterRows()[2]).slice(5)).toEqual([
       '28,80',
       '07/11/202609:00',
       '0',
       '0%',
+      'Vender',
     ]);
   });
 
@@ -157,7 +160,13 @@ describe('ClubPage', () => {
     renderClub({ body: AGUIAS });
     await screen.findByRole('table');
 
-    expect(cellsOf(rosterRows()[3]).slice(5)).toEqual(['–', '–', '–', '–']);
+    expect(cellsOf(rosterRows()[3]).slice(5)).toEqual([
+      '–',
+      '–',
+      '–',
+      '–',
+      'Vender',
+    ]);
   });
 
   it('avisa quando os valores foram calculados e o teto da multa', async () => {

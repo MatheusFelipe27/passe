@@ -1,4 +1,4 @@
-import { Shirt, Users } from 'lucide-react';
+import { HandCoins, Shirt, Users } from 'lucide-react';
 import { Link } from 'react-router';
 import type { RosterPlayer } from '@/api/clubs';
 import { DataTable, type Column } from '@/components/data-table';
@@ -96,6 +96,7 @@ const COLUMNS: Column<RosterPlayer>[] = [
 
 interface RosterTableProps {
   players: RosterPlayer[] | undefined;
+  onSell: (player: RosterPlayer) => void;
   isLoading: boolean;
   isRefreshing: boolean;
   error: Error | null;
@@ -103,10 +104,29 @@ interface RosterTableProps {
 }
 
 // Elenco na ordem devolvida pela API (RN11), com o contrato calculado para uma venda agora.
-export function RosterTable({ players, ...state }: RosterTableProps) {
+export function RosterTable({ players, onSell, ...state }: RosterTableProps) {
+  const columns: Column<RosterPlayer>[] = [
+    ...COLUMNS,
+    {
+      key: 'sell',
+      header: '',
+      align: 'right',
+      cell: (player) => (
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={`Vender ${player.name}`}
+          onClick={() => onSell(player)}
+        >
+          <HandCoins aria-hidden />
+          Vender
+        </Button>
+      ),
+    },
+  ];
   return (
     <DataTable
-      columns={COLUMNS}
+      columns={columns}
       rows={players}
       rowKey={(player) => player.id}
       errorTitle="Não foi possível carregar o elenco"
