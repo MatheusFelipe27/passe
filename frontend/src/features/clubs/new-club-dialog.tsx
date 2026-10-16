@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CircleAlert, Shield, Wallet } from 'lucide-react';
+import { Shield, Wallet } from 'lucide-react';
 import { useForm, type Path } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import type { z } from 'zod';
+import { InfoNote, RefusalAlert } from '@/components/dialog-notes';
 import { FormField } from '@/components/form-field';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -95,14 +95,10 @@ export function NewClubDialog({ open, onOpenChange }: NewClubDialogProps) {
         </DialogHeader>
         <form onSubmit={submit} noValidate className="flex flex-col gap-5">
           {refusal && (
-            <Alert
-              variant="destructive"
-              className="border-destructive-soft-border bg-destructive-soft px-4 py-3"
-            >
-              <CircleAlert aria-hidden />
-              <AlertTitle>Não foi possível criar o clube</AlertTitle>
-              <AlertDescription>{refusal}</AlertDescription>
-            </Alert>
+            <RefusalAlert
+              title="Não foi possível criar o clube"
+              message={refusal}
+            />
           )}
           <FormField
             id="new-club-name"
@@ -145,10 +141,10 @@ export function NewClubDialog({ open, onOpenChange }: NewClubDialogProps) {
               />
             )}
           </FormField>
-          <p className="flex items-center gap-2.5 rounded-lg border bg-muted-subtle px-3 py-2.5 text-sm text-muted-foreground">
-            <Wallet aria-hidden className="size-4 shrink-0" />O clube começa com{' '}
-            {formatMoney(INITIAL_CASH)} em caixa e sem jogadores.
-          </p>
+          <InfoNote icon={Wallet}>
+            O clube começa com {formatMoney(INITIAL_CASH)} em caixa e sem
+            jogadores.
+          </InfoNote>
           <DialogFooter className="border-t pt-4">
             <Button
               type="button"
