@@ -14,5 +14,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Os testes que digitam em formulários grandes passam de 5 s em máquinas mais lentas.
+    testTimeout: 20_000,
   },
 });

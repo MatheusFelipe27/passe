@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApi, type MockResponse } from '@/test/fetch-mock';
@@ -53,12 +53,13 @@ describe('HomePage', () => {
   it('mostra os números da liga devolvidos pela API', async () => {
     renderHome({});
 
-    expect(await screen.findByText('23')).toBeInTheDocument();
-    expect(numberItem('jogadores')).toHaveTextContent('23jogadores');
-    expect(numberItem('livres')).toHaveTextContent('7livres');
-    expect(await screen.findByText('clubes')).toBeInTheDocument();
-    expect(numberItem('clubes')).toHaveTextContent('6clubes');
-    expect(numberItem('partidas')).toHaveTextContent('2partidas');
+    // Cada número chega numa consulta própria: espera o valor, e não só o rótulo.
+    await waitFor(() => {
+      expect(numberItem('jogadores')).toHaveTextContent('23jogadores');
+      expect(numberItem('livres')).toHaveTextContent('7livres');
+      expect(numberItem('clubes')).toHaveTextContent('6clubes');
+      expect(numberItem('partidas')).toHaveTextContent('2partidas');
+    });
   });
 
   it('usa o singular quando a contagem é 1', async () => {

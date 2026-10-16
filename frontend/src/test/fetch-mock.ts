@@ -5,6 +5,8 @@ export interface MockResponse {
   body?: unknown;
   // Atraso da resposta, para simular um pedido em andamento (como no clique duplo).
   delayMs?: number;
+  // Sem resposta: o fetch falha como numa queda de conexão.
+  networkError?: boolean;
 }
 
 type Handler = (url: URL, init: RequestInit) => MockResponse | undefined;
@@ -32,8 +34,14 @@ export function mockApiWith(handler: Handler) {
             headers: { 'Content-Type': 'application/json' },
           },
         );
-      return new Promise<Response>((resolve) =>
-        setTimeout(() => resolve(reply()), response.delayMs ?? 0),
+      return new Promise<Response>((resolve, reject) =>
+        setTimeout(
+          () =>
+            response.networkError
+              ? reject(new TypeError('Failed to fetch'))
+              : resolve(reply()),
+          response.delayMs ?? 0,
+        ),
       );
     },
   );
