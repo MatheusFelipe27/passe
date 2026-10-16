@@ -38,6 +38,20 @@ export function formatTime(instant: string | number): string {
   return timeFormat.format(new Date(instant));
 }
 
+export function formatDateTime(instant: string | number): string {
+  return `${formatDate(instant)}, ${formatTime(instant)}`;
+}
+
+const MINUS_SIGN = '−';
+
+// Variação com sinal: "+" para entrada e "−" para saída; zero sem sinal.
+export function formatSignedMoney(value: number): string {
+  if (value === 0) {
+    return formatMoney(0);
+  }
+  return `${value > 0 ? '+' : MINUS_SIGN}${formatMoney(Math.abs(value))}`;
+}
+
 export function pluralize(
   count: number,
   singular: string,

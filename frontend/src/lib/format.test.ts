@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatMoney, formatTime } from './format';
+import {
+  formatDate,
+  formatDateTime,
+  formatMoney,
+  formatSignedMoney,
+  formatTime,
+} from './format';
 
 describe('formatMoney', () => {
   it.each([
@@ -35,5 +41,27 @@ describe('formatDate e formatTime', () => {
     const instant = Date.parse('2026-11-12T15:00:00-03:00');
     expect(formatDate(instant)).toBe('12/11/2026');
     expect(formatTime(instant)).toBe('15:00');
+  });
+});
+
+describe('formatDateTime', () => {
+  it('junta a data e a hora de Brasília', () => {
+    expect(formatDateTime('2027-11-12T15:00:00-03:00')).toBe(
+      '12/11/2027, 15:00',
+    );
+  });
+});
+
+describe('formatSignedMoney', () => {
+  it.each([
+    [7.8, '+7,80'],
+    [46.02, '+46,02'],
+    [0.01, '+0,01'],
+    [0, '0,00'],
+    [-0.01, '−0,01'],
+    [-4.8, '−4,80'],
+    [-1744.14, '−1.744,14'],
+  ])('%s → %s', (value, text) => {
+    expect(formatSignedMoney(value)).toBe(text);
   });
 });
