@@ -197,6 +197,30 @@ describe('venda pela página do clube', () => {
     expect(within(result).getByText('+7,80')).toHaveClass('text-success');
   });
 
+  it('abre a aba Histórico pelo botão Ver histórico', async () => {
+    const { router } = renderClub({ body: SALE });
+    const dialog = await openSell();
+    await userEvent.click(confirmButton(dialog));
+    const result = await screen.findByRole('dialog', {
+      name: 'Venda concluída',
+    });
+
+    await userEvent.click(
+      within(result).getByRole('button', { name: 'Ver histórico' }),
+    );
+
+    expect(router.state.location.search).toBe('?tab=historico');
+    expect(screen.getByRole('tab', { name: /Histórico/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Venda concluída' }),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
   it('mostra a venda com a fidelidade cumprida, sem multa e com prejuízo', async () => {
     renderClub({ body: FULFILLED });
     const dialog = await openSell();
