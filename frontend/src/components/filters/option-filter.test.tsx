@@ -9,7 +9,11 @@ const OPTIONS = [
   { value: 'ATA', label: 'ATA' },
 ];
 
-function renderFilter(value: string | undefined, disabled = false) {
+function renderFilter(
+  value: string | undefined,
+  disabled = false,
+  showAllLabel = false,
+) {
   const onChange = vi.fn();
   render(
     <OptionFilter
@@ -20,6 +24,7 @@ function renderFilter(value: string | undefined, disabled = false) {
       value={value}
       onChange={onChange}
       disabled={disabled}
+      showAllLabel={showAllLabel}
     />,
   );
   return onChange;
@@ -38,6 +43,23 @@ describe('OptionFilter', () => {
 
     const button = screen.getByRole('button', { name: 'Posição: ATA' });
     expect(button).not.toHaveClass('text-muted-foreground');
+  });
+
+  it('mostra "Rótulo: todas" sem escolha quando pedido, com o texto escuro', () => {
+    renderFilter(undefined, false, true);
+
+    const button = screen.getByRole('button', {
+      name: 'Posição: todas as posições',
+    });
+    expect(button).not.toHaveClass('text-muted-foreground');
+  });
+
+  it('mostra a escolha mesmo quando pede o rótulo de todos', () => {
+    renderFilter('GOL', false, true);
+
+    expect(
+      screen.getByRole('button', { name: 'Posição: GOL' }),
+    ).toBeInTheDocument();
   });
 
   it('envia a opção escolhida', async () => {

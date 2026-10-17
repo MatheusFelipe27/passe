@@ -26,6 +26,8 @@ interface OptionFilterProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   disabled?: boolean;
+  // Sem escolha, o botão mostra "Rótulo: todos" em vez de só o rótulo (como no filtro do histórico).
+  showAllLabel?: boolean;
 }
 
 // Filtro de um valor só, num menu: o botão mostra a escolha atual.
@@ -37,8 +39,15 @@ export function OptionFilter({
   value,
   onChange,
   disabled = false,
+  showAllLabel = false,
 }: OptionFilterProps) {
   const selected = options.find((option) => option.value === value);
+  const isMuted = !selected && !showAllLabel;
+  const buttonText = selected
+    ? `${label}: ${selected.label}`
+    : showAllLabel
+      ? `${label}: ${allLabel.toLowerCase()}`
+      : label;
 
   return (
     <DropdownMenu>
@@ -47,11 +56,11 @@ export function OptionFilter({
           variant="outline"
           className={cn(
             'border-input font-normal',
-            !selected && 'text-muted-foreground',
+            isMuted && 'text-muted-foreground',
           )}
         >
           <Icon aria-hidden />
-          {selected ? `${label}: ${selected.label}` : label}
+          {buttonText}
           <ChevronDown aria-hidden className="text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>

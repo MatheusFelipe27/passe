@@ -25,7 +25,11 @@ const CONDITION_STYLES: Record<Condition, string> = {
 const HIGH_AGILITY = 80;
 const LOW_AGILITY = 30;
 
-export function PlayerAvatar({ player }: { player: Player }) {
+export function PlayerAvatar({
+  player,
+}: {
+  player: Pick<Player, 'id' | 'name'>;
+}) {
   return (
     <span
       aria-hidden

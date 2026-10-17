@@ -1,7 +1,8 @@
-import { cn } from 'cn';
+import { History } from 'lucide-react';
 import type { Sale } from '@/api/market';
 import { ResultDialog } from '@/components/result-dialog';
 import { ResultList, ResultRow } from '@/components/result-list';
+import { SignedMoney } from '@/components/signed-money';
 import { Button } from '@/components/ui/button';
 import { formatInteger, formatMoney, formatSignedMoney } from '@/lib/format';
 import { ContractStatusBadge } from './contract-status-badge';
@@ -10,6 +11,7 @@ interface SaleResultDialogProps {
   sale: Sale | undefined;
   clubName: string;
   onClose: () => void;
+  onShowHistory: () => void;
 }
 
 // Resultado da venda com os valores devolvidos pela API; os textos só dizem se houve multa e lucro.
@@ -17,6 +19,7 @@ export function SaleResultDialog({
   sale,
   clubName,
   onClose,
+  onShowHistory,
 }: SaleResultDialogProps) {
   if (!sale) {
     return null;
@@ -34,7 +37,15 @@ export function SaleResultDialog({
           : `${sale.player_name} voltou a ficar livre. A fidelidade já tinha terminado, então não houve multa.`
       }
       onClose={onClose}
-      footer={<Button onClick={onClose}>Fechar</Button>}
+      footer={
+        <>
+          <Button variant="outline" onClick={onShowHistory}>
+            <History aria-hidden />
+            Ver histórico
+          </Button>
+          <Button onClick={onClose}>Fechar</Button>
+        </>
+      }
     >
       <ResultList>
         <ResultRow
@@ -59,14 +70,7 @@ export function SaleResultDialog({
           }
           value={formatMoney(sale.penalty)}
         />
-        <ResultRow
-          label="Lucro"
-          value={formatSignedMoney(profit)}
-          valueClassName={cn(
-            profit > 0 && 'text-success',
-            profit < 0 && 'text-destructive',
-          )}
-        />
+        <ResultRow label="Lucro" value={<SignedMoney value={profit} />} />
         <ResultRow
           label="Comissão"
           help={
