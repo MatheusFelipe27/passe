@@ -83,10 +83,11 @@ describe('histórico de transações no banco', () => {
     clock = new FixedClock();
     const repository = new MarketRepository(prisma);
     const playersRepository = new PlayersRepository(prisma);
-    const lineups = new LineupsRepository();
+    const lineups = new LineupsRepository(prisma);
     const transactions = new TransactionRunner(prisma);
     market = new MarketService(
       repository,
+      new ClubsRepository(prisma),
       playersRepository,
       lineups,
       transactions,

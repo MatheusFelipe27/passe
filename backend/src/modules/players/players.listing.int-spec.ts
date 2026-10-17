@@ -82,7 +82,7 @@ describe('GET /players (listagem no banco)', () => {
     await prisma.$connect();
     service = new PlayersService(
       new PlayersRepository(prisma),
-      new LineupsRepository(),
+      new LineupsRepository(prisma),
       new ClubsRepository(prisma),
       new TransactionRunner(prisma),
     );

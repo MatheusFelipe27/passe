@@ -55,13 +55,6 @@ export class MarketRepository {
     });
   }
 
-  // Trava o clube até o fim da transação: o caixa e o elenco não mudam no meio da operação.
-  async lockClub(id: number, db: DbClient): Promise<Club | null> {
-    const locked = await db.$queryRaw<{ id: number }[]>`
-      SELECT id FROM clubes WHERE id = ${id} FOR UPDATE`;
-    return locked.length > 0 ? db.club.findUnique({ where: { id } }) : null;
-  }
-
   countSquad(clubId: number, db: DbClient): Promise<number> {
     return db.player.count({ where: { clubId, deletedAt: null } });
   }

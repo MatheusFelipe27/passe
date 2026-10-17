@@ -99,7 +99,7 @@ describe('PlayersService', () => {
     };
     service = new PlayersService(
       players as unknown as PlayersRepository,
-      lineups,
+      lineups as unknown as LineupsRepository,
       clubs as unknown as ClubsRepository,
       transactions as unknown as TransactionRunner,
     );

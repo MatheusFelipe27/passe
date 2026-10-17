@@ -22,6 +22,14 @@ export type ClubWithRoster = Club & { players: RosterPlayer[] };
 export class ClubsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findById(id: number, db: DbClient = this.prisma): Promise<Club | null> {
+    return db.club.findUnique({ where: { id } });
+  }
+
+  findAll(db: DbClient): Promise<Club[]> {
+    return db.club.findMany();
+  }
+
   async exists(id: number): Promise<boolean> {
     return (await this.prisma.club.count({ where: { id } })) > 0;
   }
@@ -29,6 +37,13 @@ export class ClubsRepository {
   // Duas criações ao mesmo tempo esperam uma pela outra até o fim da transação.
   async lockCreation(db: DbClient): Promise<void> {
     await db.$executeRaw`SELECT pg_advisory_xact_lock(${CLUB_CREATION_LOCK})`;
+  }
+
+  // Trava o clube até o fim da transação: o caixa e o elenco não mudam no meio da operação.
+  async lock(id: number, db: DbClient): Promise<Club | null> {
+    const locked = await db.$queryRaw<{ id: number }[]>`
+      SELECT id FROM clubes WHERE id = ${id} FOR UPDATE`;
+    return locked.length > 0 ? db.club.findUnique({ where: { id } }) : null;
   }
 
   count(db: DbClient): Promise<number> {

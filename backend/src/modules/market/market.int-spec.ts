@@ -79,8 +79,9 @@ describe('mercado no banco', () => {
     const transactions = new TransactionRunner(prisma);
     market = new MarketService(
       marketRepository,
+      new ClubsRepository(prisma),
       new PlayersRepository(prisma),
-      new LineupsRepository(),
+      new LineupsRepository(prisma),
       transactions,
       clock,
     );

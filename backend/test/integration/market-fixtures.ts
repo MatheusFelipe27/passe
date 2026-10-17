@@ -26,6 +26,10 @@ export interface PlayerFields {
   agility?: number;
   age?: number;
   clubId?: number | null;
+  shooting?: number;
+  passing?: number;
+  dribbling?: number;
+  defending?: number;
 }
 
 export function after(ms: number, from = PURCHASE_TIME): Date {
@@ -61,10 +65,10 @@ export function addPlayer(prisma: PrismaService, fields: PlayerFields) {
       condition: fields.condition ?? 'APTO',
       clubId: fields.clubId ?? null,
       pace: 50,
-      shooting: 50,
-      passing: 50,
-      dribbling: 50,
-      defending: 50,
+      shooting: fields.shooting ?? 50,
+      passing: fields.passing ?? 50,
+      dribbling: fields.dribbling ?? 50,
+      defending: fields.defending ?? 50,
       physical: 50,
       potential: 80,
     },

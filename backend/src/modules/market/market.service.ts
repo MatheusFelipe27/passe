@@ -8,6 +8,7 @@ import { formatMoneyText, money } from '../../common/money/money';
 import { Clock } from '../../common/time/clock';
 import { Player } from '../../generated/prisma/client';
 import { DbClient, TransactionRunner } from '../../prisma/transaction-runner';
+import { ClubsRepository } from '../clubs/clubs.repository';
 import { LineupsRepository } from '../lineups/lineups.repository';
 import { marketValueOf } from '../players/player.view';
 import { PlayersRepository } from '../players/players.repository';
@@ -44,6 +45,7 @@ const MAX_SQUAD = 12;
 export class MarketService {
   constructor(
     private readonly market: MarketRepository,
+    private readonly clubs: ClubsRepository,
     private readonly players: PlayersRepository,
     private readonly lineups: LineupsRepository,
     private readonly transactions: TransactionRunner,
@@ -60,7 +62,7 @@ export class MarketService {
         );
       }
       const player = await this.lockPlayer(playerId, db);
-      const club = await this.market.lockClub(input.clubId, db);
+      const club = await this.clubs.lock(input.clubId, db);
       if (!club) {
         throw new NotFoundException('Clube não encontrado.');
       }
@@ -130,7 +132,7 @@ export class MarketService {
       if (player.clubId === null) {
         throw new ConflictException('Jogador livre não pode ser vendido.');
       }
-      const club = await this.market.lockClub(player.clubId, db);
+      const club = await this.clubs.lock(player.clubId, db);
       const contract = await this.market.findActiveContract(
         player.id,
         player.clubId,
