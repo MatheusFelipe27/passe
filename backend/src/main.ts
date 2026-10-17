@@ -13,7 +13,11 @@ async function bootstrap(): Promise<void> {
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
   app.setGlobalPrefix(API_PREFIX);
-  app.enableCors({ origin: config.get('CORS_ORIGIN', { infer: true }) });
+  // O frontend lê o nome do arquivo do CSV no Content-Disposition, que o navegador só expõe se for liberado.
+  app.enableCors({
+    origin: config.get('CORS_ORIGIN', { infer: true }),
+    exposedHeaders: ['Content-Disposition'],
+  });
   app.use(jsonBodyParser);
   app.enableShutdownHooks();
 
