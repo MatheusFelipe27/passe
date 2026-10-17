@@ -3,21 +3,23 @@ import type { LucideIcon } from 'lucide-react';
 import {
   ChevronLeft,
   Coins,
+  History,
   Landmark,
   ShieldOff,
   Shirt,
   ShoppingCart,
   Wallet,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import type { ClubDetail, RosterPlayer } from '@/api/clubs';
 import { ApiError } from '@/api/http-client';
 import type { Sale } from '@/api/market';
 import { EmptyState } from '@/components/list-states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useClub } from '@/hooks/use-clubs';
+import { useTransactions } from '@/hooks/use-market';
 import {
   formatDate,
   formatInteger,
@@ -26,6 +28,7 @@ import {
 } from '@/lib/format';
 import { SaleResultDialog } from '@/features/market/sale-result-dialog';
 import { SellPlayerDialog } from '@/features/market/sell-player-dialog';
+import { TransactionHistory } from '@/features/market/transaction-history';
 import { ClubAvatar } from './club-cells';
 import { MAX_SQUAD } from './club-labels';
 import { RosterTable } from './roster-table';
@@ -33,11 +36,18 @@ import { RosterTable } from './roster-table';
 // RN15: a multa da venda é limitada a 10,00.
 const PENALTY_CAP = 10;
 
+// A aba aberta fica na URL (?tab=historico), junto com os filtros do histórico.
+const ROSTER_TAB = 'elenco';
+const HISTORY_TAB = 'historico';
+
 export function ClubPage() {
   const { id = '' } = useParams();
   const club = useClub(id);
   const [selling, setSelling] = useState<RosterPlayer>();
   const [sale, setSale] = useState<Sale>();
+  const [params, setParams] = useSearchParams();
+  const tab = params.get('tab') === HISTORY_TAB ? HISTORY_TAB : ROSTER_TAB;
+  const transactions = useTransactions(id, {});
 
   if (club.error instanceof ApiError && club.error.status === 404) {
     return (
@@ -70,52 +80,63 @@ export function ClubPage() {
           <ClubStats club={club.data} />
         </>
       )}
-      <Tabs value="roster">
+      <Tabs
+        value={tab}
+        onValueChange={(next) =>
+          setParams(next === HISTORY_TAB ? { tab: HISTORY_TAB } : {})
+        }
+        className="gap-6"
+      >
         <TabsList variant="line" className="w-full justify-start border-b">
-          <TabsTrigger value="roster" className="flex-none px-3">
+          <TabsTrigger value={ROSTER_TAB} className="flex-none px-3">
             <Shirt aria-hidden />
             Elenco
-            {players && (
-              <Badge
-                variant="secondary"
-                className="rounded-md bg-primary-soft text-primary"
-              >
-                {formatInteger(players.length)}
-              </Badge>
+            {players && <TabCount count={players.length} />}
+          </TabsTrigger>
+          <TabsTrigger value={HISTORY_TAB} className="flex-none px-3">
+            <History aria-hidden />
+            Histórico
+            {transactions.data && (
+              <TabCount count={transactions.data.data.length} />
             )}
           </TabsTrigger>
         </TabsList>
-      </Tabs>
-      <section
-        aria-label="Elenco"
-        className="overflow-hidden rounded-xl border bg-card shadow-xs"
-      >
-        {hasPlayers && (
-          <header className="flex flex-col gap-0.5 border-b px-4 py-3">
-            <h2 className="font-semibold">Elenco</h2>
+        <TabsContent value={ROSTER_TAB} className="flex flex-col gap-6">
+          <section
+            aria-label="Elenco"
+            className="overflow-hidden rounded-xl border bg-card shadow-xs"
+          >
+            {hasPlayers && (
+              <header className="flex flex-col gap-0.5 border-b px-4 py-3">
+                <h2 className="font-semibold">Elenco</h2>
+                <p className="text-xs text-muted-foreground">
+                  Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome.
+                  Contrato calculado para uma venda agora.
+                </p>
+              </header>
+            )}
+            <RosterTable
+              players={players}
+              isLoading={club.isPending}
+              isRefreshing={club.isFetching && !club.isPending}
+              error={club.error}
+              onRetry={() => void club.refetch()}
+              onSell={setSelling}
+            />
+          </section>
+          {hasPlayers && (
             <p className="text-xs text-muted-foreground">
-              Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome.
-              Contrato calculado para uma venda agora.
+              Valor de mercado, dias restantes e % de multa calculados pela API
+              para uma venda agora ({formatDate(club.dataUpdatedAt)},{' '}
+              {formatTime(club.dataUpdatedAt)}). A multa tem teto de{' '}
+              {formatMoney(PENALTY_CAP)}.
             </p>
-          </header>
-        )}
-        <RosterTable
-          players={players}
-          isLoading={club.isPending}
-          isRefreshing={club.isFetching && !club.isPending}
-          error={club.error}
-          onRetry={() => void club.refetch()}
-          onSell={setSelling}
-        />
-      </section>
-      {hasPlayers && (
-        <p className="text-xs text-muted-foreground">
-          Valor de mercado, dias restantes e % de multa calculados pela API para
-          uma venda agora ({formatDate(club.dataUpdatedAt)},{' '}
-          {formatTime(club.dataUpdatedAt)}). A multa tem teto de{' '}
-          {formatMoney(PENALTY_CAP)}.
-        </p>
-      )}
+          )}
+        </TabsContent>
+        <TabsContent value={HISTORY_TAB}>
+          <TransactionHistory clubId={id} clubCash={club.data?.cash} />
+        </TabsContent>
+      </Tabs>
       <SellPlayerDialog
         player={selling}
         clubName={club.data?.name ?? ''}
@@ -129,8 +150,23 @@ export function ClubPage() {
         sale={sale}
         clubName={club.data?.name ?? ''}
         onClose={() => setSale(undefined)}
+        onShowHistory={() => {
+          setSale(undefined);
+          setParams({ tab: HISTORY_TAB });
+        }}
       />
     </div>
+  );
+}
+
+function TabCount({ count }: { count: number }) {
+  return (
+    <Badge
+      variant="secondary"
+      className="rounded-md bg-primary-soft text-primary"
+    >
+      {formatInteger(count)}
+    </Badge>
   );
 }
 

@@ -71,10 +71,25 @@ const AGUIAS: ClubDetail = {
   players: [GOALKEEPER, DEFENDER, MIDFIELDER, WITHOUT_CONTRACT],
 };
 
+const EMPTY_HISTORY = {
+  data: [],
+  summary: {
+    total_spent: 0,
+    total_received: 0,
+    total_fees: 0,
+    total_penalties: 0,
+    total_profit: 0,
+  },
+};
+
 function renderClub(response: MockResponse, path = '/clubes/1') {
-  const fetchMock = mockApiWith((url) =>
-    apiPath(url).startsWith('/clubs/') ? response : undefined,
-  );
+  const fetchMock = mockApiWith((url) => {
+    const path = apiPath(url);
+    if (path.endsWith('/transactions')) {
+      return { body: EMPTY_HISTORY };
+    }
+    return path.startsWith('/clubs/') ? response : undefined;
+  });
   const rendered = renderRoutes(
     [
       { path: '/clubes/:id', element: <ClubPage /> },
@@ -218,7 +233,10 @@ describe('ClubPage', () => {
 
   it('mostra o erro com o message da API e tenta de novo', async () => {
     let calls = 0;
-    const fetchMock = mockApiWith(() => {
+    mockApiWith((url) => {
+      if (apiPath(url).endsWith('/transactions')) {
+        return { body: EMPTY_HISTORY };
+      }
       calls += 1;
       return calls === 1
         ? { status: 500, body: { message: 'Erro interno do servidor.' } }
@@ -237,7 +255,7 @@ describe('ClubPage', () => {
     expect(
       await screen.findByRole('heading', { name: 'Águias FC' }),
     ).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(calls).toBe(2);
   });
 
   it('põe o nome do clube no fim da trilha de navegação', async () => {
