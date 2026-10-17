@@ -24,8 +24,40 @@ export class ApiError extends Error {
 
 export async function request<T>(
   path: string,
-  { method = 'GET', query, body }: RequestOptions = {},
+  options: RequestOptions = {},
 ): Promise<T> {
+  const response = await send(path, options);
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return (await response.json()) as T;
+}
+
+export interface DownloadedFile {
+  content: string;
+  fileName: string | undefined;
+}
+
+const FILE_NAME = /filename="?([^";]+)"?/;
+
+// Arquivo devolvido pela API (como o CSV), com o nome sugerido no Content-Disposition.
+export async function requestFile(
+  path: string,
+  options: RequestOptions = {},
+): Promise<DownloadedFile> {
+  const response = await send(path, options);
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  return {
+    content: await response.text(),
+    fileName: FILE_NAME.exec(disposition)?.[1],
+  };
+}
+
+// Envia o pedido; sem resposta, ou com resposta de erro, lança ApiError com o message da API.
+async function send(
+  path: string,
+  { method = 'GET', query, body }: RequestOptions,
+): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(buildUrl(path, query), {
@@ -40,10 +72,7 @@ export async function request<T>(
   if (!response.ok) {
     throw new ApiError(await readErrorMessage(response), response.status);
   }
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
+  return response;
 }
 
 function buildUrl(path: string, query: QueryParams = {}): string {

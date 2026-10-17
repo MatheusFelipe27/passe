@@ -1,5 +1,17 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { buyPlayer, sellPlayer, type PurchaseOrder } from '@/api/market';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  buyPlayer,
+  exportTransactions,
+  getTransactions,
+  sellPlayer,
+  type PurchaseOrder,
+  type TransactionFilters,
+} from '@/api/market';
 import { queryKeys } from '@/api/query-keys';
 
 // Compra e venda mudam o jogador, o elenco e o caixa: as listas de jogadores e de clubes são rebuscadas.
@@ -31,5 +43,26 @@ export function useSellPlayer() {
   return useMutation({
     mutationFn: (playerId: number) => sellPlayer(playerId),
     onSuccess: invalidate,
+  });
+}
+
+export function useTransactions(clubId: string, filters: TransactionFilters) {
+  return useQuery({
+    queryKey: queryKeys.clubs.transactions(clubId, filters),
+    queryFn: () => getTransactions(clubId, filters),
+    placeholderData: keepPreviousData,
+  });
+}
+
+// O CSV não muda dados: é um pedido avulso, com o estado de envio para travar o botão.
+export function useExportTransactions() {
+  return useMutation({
+    mutationFn: ({
+      clubId,
+      filters,
+    }: {
+      clubId: string;
+      filters: TransactionFilters;
+    }) => exportTransactions(clubId, filters),
   });
 }

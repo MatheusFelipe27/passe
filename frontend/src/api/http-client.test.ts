@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mockApi } from '@/test/fetch-mock';
-import { ApiError, request } from './http-client';
+import { ApiError, request, requestFile } from './http-client';
 
 describe('request', () => {
   afterEach(() => {
@@ -75,6 +75,61 @@ describe('request', () => {
         'Não foi possível conectar à API. Verifique se ela está no ar.',
         0,
       ),
+    );
+  });
+});
+
+describe('requestFile', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const CSV = 'data_hora;tipo\n2026-11-05T16:40:00-03:00;VENDA\n';
+
+  it('devolve o texto como veio e o nome do arquivo sugerido pela API', async () => {
+    mockApi({
+      '/clubs/1/transactions/export?type=VENDA': {
+        text: CSV,
+        headers: {
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="transacoes-AGU.csv"',
+        },
+      },
+    });
+
+    await expect(
+      requestFile('/clubs/1/transactions/export', { query: { type: 'VENDA' } }),
+    ).resolves.toEqual({ content: CSV, fileName: 'transacoes-AGU.csv' });
+  });
+
+  it.each([
+    ['sem aspas', 'attachment; filename=historico.csv', 'historico.csv'],
+    ['sem o cabeçalho', undefined, undefined],
+  ])('lê o nome do arquivo %s', async (_, disposition, fileName) => {
+    mockApi({
+      '/arquivo': {
+        text: CSV,
+        headers: disposition ? { 'Content-Disposition': disposition } : {},
+      },
+    });
+
+    expect((await requestFile('/arquivo')).fileName).toBe(fileName);
+  });
+
+  it('lê a recusa em JSON, com o message da API', async () => {
+    mockApi({
+      '/clubs/1/transactions/export?type=compra': {
+        status: 400,
+        body: { message: 'type: deve ter um ou mais de COMPRA, VENDA' },
+      },
+    });
+
+    await expect(
+      requestFile('/clubs/1/transactions/export', {
+        query: { type: 'compra' },
+      }),
+    ).rejects.toEqual(
+      new ApiError('type: deve ter um ou mais de COMPRA, VENDA', 400),
     );
   });
 });

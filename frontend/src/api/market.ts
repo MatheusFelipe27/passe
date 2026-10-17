@@ -1,4 +1,4 @@
-import { request } from './http-client';
+import { request, requestFile, type DownloadedFile } from './http-client';
 
 export type TransactionType = 'COMPRA' | 'VENDA';
 
@@ -53,4 +53,44 @@ export function buyPlayer(
 // A venda não tem corpo: é feita pelo clube atual do jogador.
 export function sellPlayer(playerId: number): Promise<Sale> {
   return request<Sale>(`/players/${playerId}/sell`, { method: 'POST' });
+}
+
+export interface TransactionSummary {
+  total_spent: number;
+  total_received: number;
+  total_fees: number;
+  total_penalties: number;
+  total_profit: number;
+}
+
+export interface TransactionHistory {
+  data: Transaction[];
+  summary: TransactionSummary;
+}
+
+// Query params do histórico e do CSV, com os nomes do contrato da API.
+export interface TransactionFilters {
+  type?: string;
+  player_id?: number;
+}
+
+export function getTransactions(
+  clubId: string,
+  filters: TransactionFilters,
+): Promise<TransactionHistory> {
+  return request<TransactionHistory>(
+    `/clubs/${encodeURIComponent(clubId)}/transactions`,
+    { query: { ...filters } },
+  );
+}
+
+// RN18: o CSV vem pronto da API, com os mesmos filtros do histórico.
+export function exportTransactions(
+  clubId: string,
+  filters: TransactionFilters,
+): Promise<DownloadedFile> {
+  return requestFile(
+    `/clubs/${encodeURIComponent(clubId)}/transactions/export`,
+    { query: { ...filters } },
+  );
 }

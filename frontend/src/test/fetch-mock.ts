@@ -7,6 +7,9 @@ export interface MockResponse {
   delayMs?: number;
   // Sem resposta: o fetch falha como numa queda de conexão.
   networkError?: boolean;
+  // Corpo em texto puro (como o CSV), enviado como está, com os cabeçalhos indicados.
+  text?: string;
+  headers?: Record<string, string>;
 }
 
 type Handler = (url: URL, init: RequestInit) => MockResponse | undefined;
@@ -27,13 +30,20 @@ export function mockApiWith(handler: Handler) {
     (input: RequestInfo | URL, init: RequestInit = {}) => {
       const response = handler(new URL(String(input)), init) ?? NOT_FOUND;
       const reply = () =>
-        new Response(
-          response.body === undefined ? null : JSON.stringify(response.body),
-          {
-            status: response.status ?? 200,
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
+        response.text !== undefined
+          ? new Response(response.text, {
+              status: response.status ?? 200,
+              headers: response.headers,
+            })
+          : new Response(
+              response.body === undefined
+                ? null
+                : JSON.stringify(response.body),
+              {
+                status: response.status ?? 200,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            );
       return new Promise<Response>((resolve, reject) =>
         setTimeout(
           () =>
