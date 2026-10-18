@@ -4,6 +4,8 @@ import { ClubCrumb } from '@/features/clubs/club-crumb';
 import { ClubPage } from '@/features/clubs/club-page';
 import { ClubsPage } from '@/features/clubs/clubs-page';
 import { HomePage } from '@/features/home/home-page';
+import { MatchCrumb } from '@/features/league/match-crumb';
+import { MatchPage } from '@/features/league/match-page';
 import { MatchesPage } from '@/features/league/matches-page';
 import { NotFoundPage } from '@/features/not-found/not-found-page';
 import { PlayersPage } from '@/features/players/players-page';
@@ -12,6 +14,7 @@ const playersHandle: RouteHandle = { breadcrumb: ['Mercado', 'Jogadores'] };
 const clubsHandle: RouteHandle = { breadcrumb: ['Mercado', 'Clubes'] };
 const clubHandle: RouteHandle = { ...clubsHandle, current: ClubCrumb };
 const matchesHandle: RouteHandle = { breadcrumb: ['Liga', 'Partidas'] };
+const matchHandle: RouteHandle = { ...matchesHandle, current: MatchCrumb };
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -22,6 +25,7 @@ export const router = createBrowserRouter([
       { path: '/clubes', element: <ClubsPage />, handle: clubsHandle },
       { path: '/clubes/:id', element: <ClubPage />, handle: clubHandle },
       { path: '/partidas', element: <MatchesPage />, handle: matchesHandle },
+      { path: '/partidas/:id', element: <MatchPage />, handle: matchHandle },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

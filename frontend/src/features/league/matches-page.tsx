@@ -1,6 +1,5 @@
 import { ChevronRight, Plus, Shield, Swords } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
-import { cn } from 'cn';
 import type { Club } from '@/api/clubs';
 import { ApiError } from '@/api/http-client';
 import type { MatchSummary } from '@/api/league';
@@ -12,13 +11,8 @@ import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { useClubs } from '@/hooks/use-clubs';
 import { useMatches } from '@/hooks/use-league';
-import {
-  formatDate,
-  formatDateTime,
-  formatInteger,
-  formatTime,
-} from '@/lib/format';
-import { ResultBadge, Score, TeamName } from './match-cells';
+import { formatDate, formatInteger, formatTime } from '@/lib/format';
+import { ResultBadge, Score, Scoreboard, TeamName } from './match-cells';
 import { isWinner } from './match-labels';
 import { useNewMatchDialog } from './new-match-dialog-context';
 
@@ -246,64 +240,9 @@ function LatestMatch({
     <section aria-label="Última partida" className="flex flex-col gap-2">
       <h2 className="text-sm text-muted-foreground">Última partida</h2>
       <div className="flex items-center rounded-xl border bg-card px-6 py-5 shadow-xs">
-        <div className="flex flex-1 items-center justify-center gap-6">
-          <LatestSide
-            name={match.home.club_name}
-            role="Mandante"
-            acronym={acronymOf(match.home.club_id)}
-          />
-          <div className="flex flex-col items-center gap-1.5">
-            <Score match={match} size="lg" />
-            <span className="text-xs text-muted-foreground">
-              {formatDateTime(match.played_at)}
-            </span>
-            <ResultBadge result={match.result} />
-          </div>
-          <LatestSide
-            name={match.away.club_name}
-            role="Visitante"
-            acronym={acronymOf(match.away.club_id)}
-            reverse
-          />
-        </div>
+        <Scoreboard match={match} acronymOf={acronymOf} />
         <DuelsLink match={match} />
       </div>
     </section>
-  );
-}
-
-function LatestSide({
-  name,
-  role,
-  acronym,
-  reverse = false,
-}: {
-  name: string;
-  role: string;
-  acronym: string | undefined;
-  reverse?: boolean;
-}) {
-  const label = (
-    <span className={reverse ? 'flex flex-col' : 'flex flex-col items-end'}>
-      <span className="font-semibold">{name}</span>
-      <span className="text-xs text-muted-foreground">{role}</span>
-    </span>
-  );
-  const badge = acronym && (
-    <span className="flex size-12 items-center justify-center rounded-xl border bg-muted text-sm font-semibold">
-      {acronym}
-    </span>
-  );
-  // No visitante, a sigla vem antes do nome, como no TeamName.
-  return (
-    <div
-      className={cn(
-        'flex flex-1 items-center gap-3',
-        reverse ? 'justify-start' : 'justify-end',
-      )}
-    >
-      {reverse ? badge : label}
-      {reverse ? label : badge}
-    </div>
   );
 }
