@@ -48,6 +48,9 @@
   --color-avatar-teal-foreground: var(--avatar-teal-foreground);
   --color-avatar-zinc: var(--avatar-zinc);
   --color-avatar-zinc-foreground: var(--avatar-zinc-foreground);
+  --color-pitch: var(--pitch);
+  --color-pitch-stripe: var(--pitch-stripe);
+  --color-pitch-line: var(--pitch-line);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -100,6 +103,10 @@
   --avatar-cyan: #cefafe;
   --avatar-cyan-foreground: #005f78;
   --avatar-teal: #cbfbf1;
+  /* Campo das telas da liga (escalação e partida) */
+  --pitch: #1b5e33;
+  --pitch-stripe: #206a3a;
+  --pitch-line: rgb(255 255 255 / 0.45);
   --avatar-teal-foreground: #005f5a;
   --avatar-zinc: #e4e4e7;
   --avatar-zinc-foreground: #3f3f46;

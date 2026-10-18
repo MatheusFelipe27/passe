@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { CircleAlert, Info } from 'lucide-react';
+import { CircleAlert, Info, TriangleAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Faixa de recusa nas janelas de ação, com o message devolvido pela API.
@@ -19,6 +19,25 @@ export function RefusalAlert({
       <CircleAlert aria-hidden />
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
+    </Alert>
+  );
+}
+
+// Faixa de atenção: a ação é aceita, mas tem um efeito que vale avisar antes (ex.: titular que sai da escalação).
+export function WarningAlert({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <Alert className="border-warning-soft-border bg-warning-soft px-4 py-3 text-warning-soft-foreground">
+      <TriangleAlert aria-hidden />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription className="text-warning-soft-foreground">
+        {children}
+      </AlertDescription>
     </Alert>
   );
 }

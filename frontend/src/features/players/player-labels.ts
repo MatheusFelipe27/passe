@@ -40,3 +40,11 @@ export const ATTRIBUTE_NAMES: Record<keyof PlayerAttributes, string> = {
   defending: 'Defesa',
   physical: 'Físico',
 };
+
+// Iniciais do avatar: a primeira letra do primeiro e do último nome.
+export function initials(name: string): string {
+  const words = name.split(' ');
+  const first = words[0]?.[0] ?? '';
+  const last = words.length > 1 ? (words[words.length - 1][0] ?? '') : '';
+  return (first + last).toUpperCase();
+}

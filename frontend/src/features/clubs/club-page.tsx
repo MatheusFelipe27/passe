@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   ChevronLeft,
+  ClipboardList,
   Coins,
   History,
   Landmark,
@@ -29,6 +30,7 @@ import {
 import { SaleResultDialog } from '@/features/market/sale-result-dialog';
 import { SellPlayerDialog } from '@/features/market/sell-player-dialog';
 import { TransactionHistory } from '@/features/market/transaction-history';
+import { LineupTab } from '@/features/league/lineup-tab';
 import { ClubAvatar } from './club-cells';
 import { MAX_SQUAD } from './club-labels';
 import { RosterTable } from './roster-table';
@@ -36,9 +38,11 @@ import { RosterTable } from './roster-table';
 // RN15: a multa da venda é limitada a 10,00.
 const PENALTY_CAP = 10;
 
-// A aba aberta fica na URL (?tab=historico), junto com os filtros do histórico.
+// A aba aberta fica na URL (?tab=escalacao ou ?tab=historico), junto com os filtros do histórico.
 const ROSTER_TAB = 'elenco';
+const LINEUP_TAB = 'escalacao';
 const HISTORY_TAB = 'historico';
+const TABS = [ROSTER_TAB, LINEUP_TAB, HISTORY_TAB];
 
 export function ClubPage() {
   const { id = '' } = useParams();
@@ -46,7 +50,8 @@ export function ClubPage() {
   const [selling, setSelling] = useState<RosterPlayer>();
   const [sale, setSale] = useState<Sale>();
   const [params, setParams] = useSearchParams();
-  const tab = params.get('tab') === HISTORY_TAB ? HISTORY_TAB : ROSTER_TAB;
+  const requestedTab = params.get('tab') ?? ROSTER_TAB;
+  const tab = TABS.includes(requestedTab) ? requestedTab : ROSTER_TAB;
   const transactions = useTransactions(id, {});
 
   if (club.error instanceof ApiError && club.error.status === 404) {
@@ -83,7 +88,7 @@ export function ClubPage() {
       <Tabs
         value={tab}
         onValueChange={(next) =>
-          setParams(next === HISTORY_TAB ? { tab: HISTORY_TAB } : {})
+          setParams(next === ROSTER_TAB ? {} : { tab: next })
         }
         className="gap-6"
       >
@@ -92,6 +97,10 @@ export function ClubPage() {
             <Shirt aria-hidden />
             Elenco
             {players && <TabCount count={players.length} />}
+          </TabsTrigger>
+          <TabsTrigger value={LINEUP_TAB} className="flex-none px-3">
+            <ClipboardList aria-hidden />
+            Escalação
           </TabsTrigger>
           <TabsTrigger value={HISTORY_TAB} className="flex-none px-3">
             <History aria-hidden />
@@ -132,6 +141,14 @@ export function ClubPage() {
               {formatMoney(PENALTY_CAP)}.
             </p>
           )}
+        </TabsContent>
+        <TabsContent value={LINEUP_TAB}>
+          <LineupTab
+            clubId={id}
+            club={club.data}
+            clubError={club.error}
+            reloadClub={() => club.refetch()}
+          />
         </TabsContent>
         <TabsContent value={HISTORY_TAB}>
           <TransactionHistory clubId={id} clubCash={club.data?.cash} />

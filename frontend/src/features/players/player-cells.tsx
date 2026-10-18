@@ -3,7 +3,7 @@ import { cn } from 'cn';
 import type { Club } from '@/api/clubs';
 import type { Condition, Player } from '@/api/players';
 import { Badge } from '@/components/ui/badge';
-import { CONDITION_NAMES, POSITION_NAMES } from './player-labels';
+import { CONDITION_NAMES, initials, POSITION_NAMES } from './player-labels';
 
 const AVATAR_COLORS = [
   'bg-avatar-zinc text-avatar-zinc-foreground',
@@ -117,11 +117,4 @@ export function PlayerClub({
       </Link>
     </span>
   );
-}
-
-function initials(name: string): string {
-  const words = name.split(' ');
-  const first = words[0]?.[0] ?? '';
-  const last = words.length > 1 ? (words[words.length - 1][0] ?? '') : '';
-  return (first + last).toUpperCase();
 }
