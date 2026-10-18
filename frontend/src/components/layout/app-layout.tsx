@@ -4,6 +4,7 @@ import { ChevronRight, PanelLeft, RefreshCw } from 'lucide-react';
 import { Outlet, useMatches } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { NewClubDialogProvider } from '@/features/clubs/new-club-dialog-provider';
+import { NewMatchDialogProvider } from '@/features/league/new-match-dialog-provider';
 import { useStoredFlag } from '@/hooks/use-stored-flag';
 import { AppSidebar } from './app-sidebar';
 
@@ -20,17 +21,19 @@ export function AppLayout() {
 
   return (
     <NewClubDialogProvider>
-      <div className="flex h-svh bg-sidebar">
-        <AppSidebar collapsed={collapsed} />
-        <div className="flex min-w-0 flex-1 flex-col py-2 pr-2">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[14px] bg-background shadow-sm">
-            <Topbar collapsed={collapsed} onToggleSidebar={toggleSidebar} />
-            <main className="flex-1 overflow-y-auto px-8 pt-7 pb-10">
-              <Outlet />
-            </main>
+      <NewMatchDialogProvider>
+        <div className="flex h-svh bg-sidebar">
+          <AppSidebar collapsed={collapsed} />
+          <div className="flex min-w-0 flex-1 flex-col py-2 pr-2">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[14px] bg-background shadow-sm">
+              <Topbar collapsed={collapsed} onToggleSidebar={toggleSidebar} />
+              <main className="flex-1 overflow-y-auto px-8 pt-7 pb-10">
+                <Outlet />
+              </main>
+            </div>
           </div>
         </div>
-      </div>
+      </NewMatchDialogProvider>
     </NewClubDialogProvider>
   );
 }
