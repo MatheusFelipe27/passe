@@ -21,6 +21,7 @@ export const queryKeys = {
   },
   matches: {
     all: ['matches'] as const,
+    list: (clubId?: number) => ['matches', 'list', clubId ?? null] as const,
   },
   standings: {
     all: ['standings'] as const,

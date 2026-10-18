@@ -1,15 +1,39 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   getLineup,
   getStandings,
   listMatches,
+  playMatch,
   saveLineup,
   type LineupOrder,
+  type MatchOrder,
 } from '@/api/league';
 import { queryKeys } from '@/api/query-keys';
 
-export function useMatches() {
-  return useQuery({ queryKey: queryKeys.matches.all, queryFn: listMatches });
+export function useMatches(clubId?: number) {
+  return useQuery({
+    queryKey: queryKeys.matches.list(clubId),
+    queryFn: () => listMatches(clubId),
+    placeholderData: keepPreviousData,
+  });
+}
+
+// A partida entra no histórico e muda a classificação; caixa, escalação e jogadores não mudam.
+export function usePlayMatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (order: MatchOrder) => playMatch(order),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.matches.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.standings.all }),
+      ]),
+  });
 }
 
 export function useStandings() {

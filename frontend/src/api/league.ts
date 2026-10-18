@@ -1,10 +1,12 @@
 import { request } from './http-client';
-import type { Player } from './players';
+import type { Condition, Player, Position } from './players';
+
+export type MatchResult = 'MANDANTE' | 'VISITANTE' | 'EMPATE';
 
 export interface MatchSide {
   club_id: number;
   club_name: string;
-  formation: string;
+  formation: Formation;
   goals: number;
 }
 
@@ -13,7 +15,36 @@ export interface MatchSummary {
   played_at: string;
   home: MatchSide;
   away: MatchSide;
-  result: 'MANDANTE' | 'VISITANTE' | 'EMPATE';
+  result: MatchResult;
+}
+
+export type DuelAttribute = 'shooting' | 'passing' | 'dribbling' | 'defending';
+
+// O jogador do duelo com os dados do momento da partida, já com o efeito da condição.
+export interface DuelPlayer {
+  player_id: number;
+  player_name: string;
+  position: Position;
+  condition: Condition;
+  attribute: DuelAttribute;
+  value: number;
+}
+
+export interface Duel {
+  order: number;
+  attacking_club_id: number;
+  attacker: DuelPlayer;
+  defender: DuelPlayer;
+  goal: boolean;
+}
+
+export interface MatchDetail extends MatchSummary {
+  duels: Duel[];
+}
+
+export interface MatchOrder {
+  home_club_id: number;
+  away_club_id: number;
 }
 
 export interface Standing {
@@ -30,8 +61,13 @@ export interface Standing {
   points: number;
 }
 
-export function listMatches(): Promise<MatchSummary[]> {
-  return request<MatchSummary[]>('/matches');
+// Sem club_id, todas as partidas; com ele, só as do clube, como mandante ou visitante.
+export function listMatches(clubId?: number): Promise<MatchSummary[]> {
+  return request<MatchSummary[]>('/matches', { query: { club_id: clubId } });
+}
+
+export function playMatch(order: MatchOrder): Promise<MatchDetail> {
+  return request<MatchDetail>('/matches', { method: 'POST', body: order });
 }
 
 export function getStandings(): Promise<Standing[]> {
