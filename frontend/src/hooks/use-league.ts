@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import {
   getLineup,
+  getMatch,
   getStandings,
   listMatches,
   playMatch,
@@ -20,6 +21,14 @@ export function useMatches(clubId?: number) {
     queryKey: queryKeys.matches.list(clubId),
     queryFn: () => listMatches(clubId),
     placeholderData: keepPreviousData,
+  });
+}
+
+// A partida gravada não muda depois (RN20): a consulta só busca o que a API guardou.
+export function useMatch(id: string) {
+  return useQuery({
+    queryKey: queryKeys.matches.detail(id),
+    queryFn: () => getMatch(id),
   });
 }
 

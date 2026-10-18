@@ -66,6 +66,11 @@ export function listMatches(clubId?: number): Promise<MatchSummary[]> {
   return request<MatchSummary[]>('/matches', { query: { club_id: clubId } });
 }
 
+// O id vem da URL da tela como texto: um id malformado chega à API, que responde 404.
+export function getMatch(id: string): Promise<MatchDetail> {
+  return request<MatchDetail>(`/matches/${encodeURIComponent(id)}`);
+}
+
 export function playMatch(order: MatchOrder): Promise<MatchDetail> {
   return request<MatchDetail>('/matches', { method: 'POST', body: order });
 }
