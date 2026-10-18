@@ -16,6 +16,8 @@ export const queryKeys = {
     // Dentro de "clubs": compra e venda já rebuscam tudo o que começa por essa chave.
     transactions: (id: string, filters: TransactionFilters) =>
       ['clubs', 'transactions', id, filters] as const,
+    // Também dentro de "clubs": a venda e a condição DOENTE tiram o titular da escalação.
+    lineup: (id: string) => ['clubs', 'lineup', id] as const,
   },
   matches: {
     all: ['matches'] as const,

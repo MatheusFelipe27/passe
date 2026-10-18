@@ -1,4 +1,5 @@
 import { request } from './http-client';
+import type { Player } from './players';
 
 export interface MatchSide {
   club_id: number;
@@ -35,4 +36,33 @@ export function listMatches(): Promise<MatchSummary[]> {
 
 export function getStandings(): Promise<Standing[]> {
   return request<Standing[]>('/standings');
+}
+
+export type Formation = '3-1' | '2-2' | '2-1-1' | '1-2-1';
+
+export interface Lineup {
+  club_id: number;
+  formation: Formation | null;
+  complete: boolean;
+  players: Player[];
+}
+
+export interface LineupOrder {
+  formation: Formation;
+  player_ids: number[];
+}
+
+// O id vem da URL da tela como texto, como em getClub.
+export function getLineup(clubId: string): Promise<Lineup> {
+  return request<Lineup>(`/clubs/${encodeURIComponent(clubId)}/lineup`);
+}
+
+export function saveLineup(
+  clubId: string,
+  order: LineupOrder,
+): Promise<Lineup> {
+  return request<Lineup>(`/clubs/${encodeURIComponent(clubId)}/lineup`, {
+    method: 'PUT',
+    body: order,
+  });
 }
