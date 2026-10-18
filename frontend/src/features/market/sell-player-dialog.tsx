@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { HandCoins, Info, Loader2, RefreshCw } from 'lucide-react';
 import type { RosterPlayer } from '@/api/clubs';
 import type { Sale } from '@/api/market';
-import { InfoNote, RefusalAlert } from '@/components/dialog-notes';
+import {
+  InfoNote,
+  RefusalAlert,
+  WarningAlert,
+} from '@/components/dialog-notes';
 import { ResultList, ResultRow } from '@/components/result-list';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useIsStarter } from '@/hooks/use-league';
 import { useSellPlayer } from '@/hooks/use-market';
 import { useSubmitOnce } from '@/hooks/use-submit-once';
 import { formatDateTime, formatInteger, formatMoney } from '@/lib/format';
@@ -25,7 +30,8 @@ interface SellPlayerDialogProps {
   player: RosterPlayer | undefined;
   clubName: string;
   onClose: () => void;
-  onSold: (sale: Sale) => void;
+  // wasStarter: o vendido era titular e saiu da escalação na mesma operação (RN19).
+  onSold: (sale: Sale, wasStarter: boolean) => void;
 }
 
 export function SellPlayerDialog({
@@ -58,6 +64,7 @@ function SellPlayerConfirmation({
   const sellPlayer = useSellPlayer();
   const submitOnce = useSubmitOnce();
   const [failure, setFailure] = useState<ActionFailure>();
+  const isStarter = useIsStarter(player);
   const isSending = sellPlayer.isPending;
   const { contract } = player;
 
@@ -71,7 +78,7 @@ function SellPlayerConfirmation({
     void submitOnce(async () => {
       setFailure(undefined);
       try {
-        onSold(await sellPlayer.mutateAsync(player.id));
+        onSold(await sellPlayer.mutateAsync(player.id), isStarter);
       } catch (error) {
         setFailure(toActionFailure(error));
       }
@@ -88,6 +95,12 @@ function SellPlayerConfirmation({
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="flex flex-col gap-4">
+          {isStarter && (
+            <WarningAlert title={`${player.name} é titular`}>
+              Ao vender, ele sai da escalação, e o {clubName} só volta a jogar
+              partidas depois de escalar de novo os 5 titulares.
+            </WarningAlert>
+          )}
           {failure?.kind === 'network' && (
             <RefusalAlert
               title="Sem conexão"

@@ -10,6 +10,7 @@ import { ContractStatusBadge } from './contract-status-badge';
 interface SaleResultDialogProps {
   sale: Sale | undefined;
   clubName: string;
+  wasStarter: boolean;
   onClose: () => void;
   onShowHistory: () => void;
 }
@@ -18,6 +19,7 @@ interface SaleResultDialogProps {
 export function SaleResultDialog({
   sale,
   clubName,
+  wasStarter,
   onClose,
   onShowHistory,
 }: SaleResultDialogProps) {
@@ -26,6 +28,9 @@ export function SaleResultDialog({
   }
   const hasPenalty = sale.penalty > 0;
   const profit = sale.profit ?? 0;
+  const freed = wasStarter
+    ? `${sale.player_name} voltou a ficar livre e saiu da escalação.`
+    : `${sale.player_name} voltou a ficar livre.`;
 
   return (
     <ResultDialog
@@ -33,8 +38,8 @@ export function SaleResultDialog({
       title="Venda concluída"
       description={
         hasPenalty
-          ? `${sale.player_name} voltou a ficar livre.`
-          : `${sale.player_name} voltou a ficar livre. A fidelidade já tinha terminado, então não houve multa.`
+          ? freed
+          : `${freed} A fidelidade já tinha terminado, então não houve multa.`
       }
       onClose={onClose}
       footer={

@@ -19,11 +19,23 @@ export function useStandings() {
   });
 }
 
-export function useLineup(clubId: string) {
+// Sem clube, não há escalação para buscar.
+export function useLineup(clubId: string | undefined) {
   return useQuery({
-    queryKey: queryKeys.clubs.lineup(clubId),
-    queryFn: () => getLineup(clubId),
+    queryKey: queryKeys.clubs.lineup(clubId ?? ''),
+    queryFn: () => getLineup(clubId!),
+    enabled: clubId !== undefined,
   });
+}
+
+// RN19: se o jogador está na escalação do clube dele; jogador livre nunca é titular.
+export function useIsStarter(player: { id: number; club_id: number | null }) {
+  const lineup = useLineup(
+    player.club_id === null ? undefined : String(player.club_id),
+  );
+  return (
+    lineup.data?.players.some((starter) => starter.id === player.id) ?? false
+  );
 }
 
 // Escalar não muda o caixa nem o elenco: só a escalação passa a ser a devolvida pela API.

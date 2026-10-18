@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { cn } from 'cn';
 import type { Condition, Player } from '@/api/players';
+import { WarningAlert } from '@/components/dialog-notes';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useClubs } from '@/hooks/use-clubs';
+import { useIsStarter } from '@/hooks/use-league';
 import { useChangeCondition } from '@/hooks/use-players';
 import { useSubmitOnce } from '@/hooks/use-submit-once';
 import { formatMoney } from '@/lib/format';
@@ -50,6 +53,10 @@ function ConditionForm({
   const [condition, setCondition] = useState<Condition>(player.condition);
   const changeCondition = useChangeCondition();
   const submitOnce = useSubmitOnce();
+  const isStarter = useIsStarter(player);
+  const clubs = useClubs();
+  const clubName =
+    clubs.data?.find((club) => club.id === player.club_id)?.name ?? 'clube';
 
   // A tela pode impedir de DOENTE direto para APTO, que a API recusaria (409).
   const isBlocked = (option: Condition) =>
@@ -129,6 +136,12 @@ function ConditionForm({
             </label>
           ))}
         </RadioGroup>
+        {isStarter && condition === 'DOENTE' && (
+          <WarningAlert title={`${player.name} é titular`}>
+            Ao passar a Doente, ele sai da escalação, e o {clubName} só volta a
+            jogar partidas depois de escalar de novo os 5 titulares.
+          </WarningAlert>
+        )}
         <DialogFooter className="border-t pt-4">
           <Button variant="outline" onClick={onClose}>
             Cancelar

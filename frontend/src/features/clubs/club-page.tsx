@@ -48,7 +48,7 @@ export function ClubPage() {
   const { id = '' } = useParams();
   const club = useClub(id);
   const [selling, setSelling] = useState<RosterPlayer>();
-  const [sale, setSale] = useState<Sale>();
+  const [sale, setSale] = useState<{ result: Sale; wasStarter: boolean }>();
   const [params, setParams] = useSearchParams();
   const requestedTab = params.get('tab') ?? ROSTER_TAB;
   const tab = TABS.includes(requestedTab) ? requestedTab : ROSTER_TAB;
@@ -158,13 +158,14 @@ export function ClubPage() {
         player={selling}
         clubName={club.data?.name ?? ''}
         onClose={() => setSelling(undefined)}
-        onSold={(result) => {
+        onSold={(result, wasStarter) => {
           setSelling(undefined);
-          setSale(result);
+          setSale({ result, wasStarter });
         }}
       />
       <SaleResultDialog
-        sale={sale}
+        sale={sale?.result}
+        wasStarter={sale?.wasStarter ?? false}
         clubName={club.data?.name ?? ''}
         onClose={() => setSale(undefined)}
         onShowHistory={() => {
