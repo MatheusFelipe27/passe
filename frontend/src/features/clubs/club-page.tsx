@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
-  ChevronLeft,
+  ArrowLeft,
   ClipboardList,
   Coins,
   History,
   Landmark,
-  ShieldOff,
+  SearchX,
   Shirt,
   ShoppingCart,
   Wallet,
@@ -58,14 +58,14 @@ export function ClubPage() {
     return (
       <section className="rounded-xl border bg-card shadow-xs">
         <EmptyState
-          icon={ShieldOff}
+          icon={SearchX}
           title="Clube não encontrado"
-          description="O clube pedido não existe. Volte à lista e escolha outro clube."
+          description={`${club.error.message} O endereço pode estar errado ou o clube não existe.`}
           action={
             <Button asChild variant="outline">
               <Link to="/clubes">
-                <ChevronLeft aria-hidden />
-                Ver clubes
+                <ArrowLeft aria-hidden />
+                Voltar para clubes
               </Link>
             </Button>
           }

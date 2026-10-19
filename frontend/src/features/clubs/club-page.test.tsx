@@ -225,9 +225,16 @@ describe('ClubPage', () => {
     );
 
     expect(await screen.findByText('Clube não encontrado')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Clube não encontrado. O endereço pode estar errado ou o clube não existe.',
+      ),
+    ).toBeInTheDocument();
     expect(apiPath(requestedUrls(fetchMock)[0])).toBe(requested);
 
-    await userEvent.click(screen.getByRole('link', { name: 'Ver clubes' }));
+    await userEvent.click(
+      screen.getByRole('link', { name: 'Voltar para clubes' }),
+    );
     expect(await screen.findByText('Lista de clubes')).toBeInTheDocument();
   });
 
@@ -298,5 +305,47 @@ describe('ClubPage', () => {
     expect(within(trail).getByText('Clubes')).not.toHaveAttribute(
       'aria-current',
     );
+  });
+
+  it('clube inexistente: a trilha mostra o id da URL', async () => {
+    mockApiWith((url) => {
+      const path = apiPath(url);
+      if (path === '/clubs/99') {
+        return { status: 404, body: { message: 'Clube não encontrado.' } };
+      }
+      if (path === '/clubs' || path === '/matches') {
+        return { body: [] };
+      }
+      return {
+        body: {
+          data: [],
+          meta: { page: 1, limit: 1, total_items: 0, total_pages: 0 },
+        },
+      };
+    });
+    const handle: RouteHandle = {
+      breadcrumb: ['Mercado', 'Clubes'],
+      current: ClubCrumb,
+    };
+    renderRoutes(
+      [
+        {
+          element: <AppLayout />,
+          children: [{ path: '/clubes/:id', element: <ClubPage />, handle }],
+        },
+      ],
+      '/clubes/99',
+    );
+
+    const trail = screen.getByRole('navigation', {
+      name: 'Trilha de navegação',
+    });
+    expect(await within(trail).findByText('Clube 99')).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(
+      await screen.findByRole('link', { name: 'Voltar para clubes' }),
+    ).toBeInTheDocument();
   });
 });
