@@ -3,6 +3,7 @@ import {
   formatDate,
   formatDateTime,
   formatMoney,
+  formatSignedInteger,
   formatSignedMoney,
   formatTime,
 } from './format';
@@ -63,5 +64,18 @@ describe('formatSignedMoney', () => {
     [-1744.14, '−1.744,14'],
   ])('%s → %s', (value, text) => {
     expect(formatSignedMoney(value)).toBe(text);
+  });
+});
+
+describe('formatSignedInteger', () => {
+  it.each([
+    [2, '+2'],
+    [1, '+1'],
+    [0, '0'],
+    [-1, '−1'],
+    [-2, '−2'],
+    [1200, '+1.200'],
+  ])('%i → %s', (value, text) => {
+    expect(formatSignedInteger(value)).toBe(text);
   });
 });

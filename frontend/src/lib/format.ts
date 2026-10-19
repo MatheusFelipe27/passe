@@ -52,6 +52,14 @@ export function formatSignedMoney(value: number): string {
   return `${value > 0 ? '+' : MINUS_SIGN}${formatMoney(Math.abs(value))}`;
 }
 
+// Saldo de gols com sinal, como a variação do caixa: "+2", "0" e "−2".
+export function formatSignedInteger(value: number): string {
+  if (value === 0) {
+    return formatInteger(0);
+  }
+  return `${value > 0 ? '+' : MINUS_SIGN}${formatInteger(Math.abs(value))}`;
+}
+
 export function pluralize(
   count: number,
   singular: string,
