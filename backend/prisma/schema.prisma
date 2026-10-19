@@ -2,6 +2,8 @@ generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
   moduleFormat = "cjs"
+  // Fixo, para o cliente gerado ser igual em qualquer máquina (o padrão depende do tsconfig.json).
+  importFileExtension = "js"
 }
 
 datasource db {
