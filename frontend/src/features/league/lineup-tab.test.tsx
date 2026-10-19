@@ -358,9 +358,14 @@ describe('aba Escalação', () => {
         'Escolha a formação e um titular para cada vaga para salvar.',
       ),
     ).toBeInTheDocument();
-    expect(
+    await userEvent.click(
       screen.getByRole('button', { name: 'Salvar escalação' }),
-    ).toBeDisabled();
+    );
+
+    expect(screen.getAllByText('Escolha o titular desta vaga.')).toHaveLength(
+      5,
+    );
+    expect(slot('Goleiro')).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('elenco com menos de 5: diz quantos jogadores tem', async () => {
@@ -437,9 +442,14 @@ describe('aba Escalação', () => {
     ).toBeInTheDocument();
     expect(slot('Defesa 1')).toHaveDisplayValue('Diego Ramos (LAT)');
     expect(slot('Defesa 2')).toHaveDisplayValue('Sem ZAG ou LAT disponível');
-    expect(
+    await userEvent.click(
       screen.getByRole('button', { name: 'Salvar escalação' }),
-    ).toBeDisabled();
+    );
+
+    expect(
+      screen.getByText('Nenhum jogador disponível para esta vaga.'),
+    ).toBeInTheDocument();
+    expect(slot('Defesa 1')).toHaveAttribute('aria-invalid', 'false');
   });
 
   it('incompleta com reserva que pode entrar: pede para escalar de novo', async () => {
@@ -481,9 +491,13 @@ describe('aba Escalação', () => {
     expect(slot('Meio 1')).toHaveDisplayValue('Sávio Lima (MEI)');
     expect(slot('Meio 2')).toHaveDisplayValue('Sem MEI disponível');
     expect(slot('Ataque')).toHaveDisplayValue('João Silva (ATA)');
-    expect(
+    await userEvent.click(
       screen.getByRole('button', { name: 'Salvar escalação' }),
-    ).toBeDisabled();
+    );
+
+    expect(
+      screen.getAllByText('Nenhum jogador disponível para esta vaga.'),
+    ).toHaveLength(1);
 
     await userEvent.click(screen.getByRole('radio', { name: /^3-1/ }));
 
@@ -536,10 +550,22 @@ describe('aba Escalação', () => {
     await userEvent.selectOptions(slot('Meio'), '5');
     await userEvent.selectOptions(slot('Goleiro'), '8');
     await userEvent.selectOptions(slot('Defesa 2'), '4');
-    expect(
+    await userEvent.click(
       screen.getByRole('button', { name: 'Salvar escalação' }),
-    ).toBeDisabled();
+    );
+    expect(
+      screen.getByText('Escolha o titular desta vaga.'),
+    ).toBeInTheDocument();
+    expect(slot('Defesa 1')).toHaveAttribute('aria-invalid', 'true');
+    expect(sentChanges(fetchMock)).toEqual([]);
+
     await userEvent.selectOptions(slot('Defesa 1'), '3');
+
+    expect(
+      screen.queryByText('Escolha o titular desta vaga.'),
+    ).not.toBeInTheDocument();
+    expect(slot('Defesa 1')).toHaveAttribute('aria-invalid', 'false');
+
     await userEvent.click(
       screen.getByRole('button', { name: 'Salvar escalação' }),
     );
@@ -674,10 +700,17 @@ describe('aba Escalação', () => {
     await waitForEditor();
 
     await userEvent.click(screen.getByRole('radio', { name: /^2-2/ }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Salvar escalação' }),
+    );
+    expect(
+      screen.getByText('Nenhum jogador disponível para esta vaga.'),
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
 
     expect(screen.getByRole('radio', { name: /^2-1-1/ })).toBeChecked();
     expect(slot('Meio')).toHaveDisplayValue('Sávio Lima (MEI)');
+    expect(screen.queryByText(/desta vaga\.$/)).not.toBeInTheDocument();
     expect(sentChanges(fetchMock)).toEqual([]);
   });
 

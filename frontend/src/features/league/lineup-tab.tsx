@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import {
   Check,
   ChevronDown,
+  CircleAlert,
   CircleCheck,
   Lock,
   RefreshCw,
@@ -114,6 +115,8 @@ function LineupEditor({ clubId, club, lineup, reload }: LineupEditorProps) {
   const saveLineup = useSaveLineup(clubId);
   const submitOnce = useSubmitOnce();
   const [failure, setFailure] = useState<ActionFailure>();
+  // Depois de tentar salvar com vaga vazia, cada vaga vazia mostra a mensagem junto ao campo.
+  const [showMissing, setShowMissing] = useState(false);
   const [source, setSource] = useState(lineup);
   const [formation, setFormation] = useState(initialFormation(lineup));
   const [picks, setPicks] = useState<Picks>(() =>
@@ -121,6 +124,7 @@ function LineupEditor({ clubId, club, lineup, reload }: LineupEditorProps) {
   );
 
   function reset(saved: Lineup) {
+    setShowMissing(false);
     setSource(saved);
     setFormation(initialFormation(saved));
     setPicks(assignPlayers(initialFormation(saved), saved.players));
@@ -154,8 +158,13 @@ function LineupEditor({ clubId, club, lineup, reload }: LineupEditorProps) {
     setPicks(assignPlayers(next, chosen));
   }
 
-  // RN19: o pedido leva a formação e os 5 ids, e a API confere tudo de novo.
+  // RN19: o pedido leva a formação e os 5 ids, e a API confere tudo de novo. Com vaga vazia,
+  // nada é enviado.
   function save() {
+    if (!isFilled) {
+      setShowMissing(true);
+      return;
+    }
     void submitOnce(async () => {
       setFailure(undefined);
       try {
@@ -245,6 +254,7 @@ function LineupEditor({ clubId, club, lineup, reload }: LineupEditorProps) {
                     player.condition !== 'DOENTE',
                 )}
                 disabled={isSending}
+                showMissing={showMissing}
                 onChoose={(playerId) => choose(slot, playerId)}
               />
             ))}
@@ -268,7 +278,7 @@ function LineupEditor({ clubId, club, lineup, reload }: LineupEditorProps) {
             >
               Cancelar
             </Button>
-            <Button disabled={!isFilled || isSending} onClick={save}>
+            <Button disabled={isSending} onClick={save}>
               {failure?.kind === 'network' ? (
                 <RefreshCw aria-hidden />
               ) : (
@@ -415,6 +425,7 @@ interface SlotRowProps {
   options: Player[];
   inRoster: boolean;
   disabled: boolean;
+  showMissing: boolean;
   onChoose: (playerId: number | undefined) => void;
 }
 
@@ -424,6 +435,7 @@ function SlotRow({
   options,
   inRoster,
   disabled,
+  showMissing,
   onChoose,
 }: SlotRowProps) {
   const sector = SECTORS[slot.sector];
@@ -435,6 +447,13 @@ function SlotRow({
       : inRoster
         ? `Sem ${sector.hint} disponível`
         : `Sem ${sector.hint} no elenco`;
+  const missing =
+    showMissing && !player
+      ? options.length > 0
+        ? 'Escolha o titular desta vaga.'
+        : 'Nenhum jogador disponível para esta vaga.'
+      : undefined;
+  const messageId = `slot-${slot.key}-message`;
   return (
     <TableRow>
       <TableCell className="pl-5">
@@ -447,6 +466,8 @@ function SlotRow({
         <div className="relative">
           <select
             aria-label={name}
+            aria-invalid={missing !== undefined}
+            aria-describedby={missing ? messageId : undefined}
             value={player?.id ?? ''}
             disabled={disabled || options.length === 0}
             onChange={(event) =>
@@ -456,7 +477,7 @@ function SlotRow({
                   : Number(event.target.value),
               )
             }
-            className="h-9 w-full cursor-pointer appearance-none rounded-lg border border-input bg-transparent pr-9 pl-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted-subtle disabled:text-muted-foreground"
+            className="h-9 w-full cursor-pointer appearance-none rounded-lg border border-input bg-transparent pr-9 pl-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted-subtle disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20"
           >
             <option value="">{placeholder}</option>
             {options.map((option) => (
@@ -470,6 +491,16 @@ function SlotRow({
             className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
           />
         </div>
+        {missing && (
+          <p
+            id={messageId}
+            role="alert"
+            className="mt-1.5 flex items-start gap-1.5 text-xs text-destructive"
+          >
+            <CircleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
+            {missing}
+          </p>
+        )}
       </TableCell>
       <TableCell>
         {player && <ConditionBadge condition={player.condition} />}
