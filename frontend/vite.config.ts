@@ -14,7 +14,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    // Os testes que digitam em formulários grandes passam de 5 s em máquinas mais lentas.
-    testTimeout: 20_000,
+    // Folga para máquinas lentas (a da banca tem 4 vCPUs e roda os testes com a API e a interface no ar):
+    // os testes que digitam em formulários grandes podem passar de 20 s. Num teste normal, a folga não é usada.
+    testTimeout: 60_000,
   },
 });
